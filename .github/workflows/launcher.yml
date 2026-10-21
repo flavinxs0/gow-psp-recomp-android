@@ -1,7 +1,7 @@
 # Builds GoWLauncher.exe on Windows and uploads it as a workflow artifact.
 # No game data is used or available here: the launcher bundles only git-tracked sources and asks the player for
 # their own disc image. Releases are created manually (phase 14 step 3), so this workflow publishes nothing.
-name: launcher
+name: "Inicializador Windows (original) / Windows launcher (upstream)"
 
 on:
   push:
@@ -25,13 +25,13 @@ jobs:
         with:
           python-version: "3.15.0"
 
-      - name: Install build requirements
+      - name: Instalar dependências de compilação / Install build requirements
         run: python -m pip install -r tools/requirements-dev.txt
 
-      - name: Build GoWLauncher.exe
+      - name: Compilar GoWLauncher.exe / Build GoWLauncher.exe
         run: python tools/build_launcher.py
 
-      - name: Smoke test
+      - name: Teste rápido / Smoke test
         shell: pwsh
         run: |
           # The exe is a windowed (GUI-subsystem) app, so `& $exe` does not wait and leaves $LASTEXITCODE unset:
@@ -44,14 +44,14 @@ jobs:
 
       # The players' default toolchain: download llvm-mingw, CMake and Ninja (pinned SHA-256) like the launcher does
       # and build gow_disc with it (the game itself needs the recompiled C from a disc, which CI never has).
-      - name: Portable toolchain check
+      - name: Verificar ferramentas portáteis / Portable toolchain check
         run: python tools/check_portable_toolchain.py
 
       # Players have no Git: fail if a Git fetch comes back (static scan + configure of both builds with Git hidden).
-      - name: No-Git check
+      - name: Verificação sem Git / No-Git check
         run: python tools/check_no_git.py --full
 
-      # SHA256SUMS.txt for the release: the ZIP and the exe inside it (sha256sum format; check with `sha256sum -c`
+      # Gerar SHA256SUMS.txt / Generate SHA256SUMS.txt for the release: the ZIP and the exe inside it (sha256sum format; check with `sha256sum -c`
       # next to the ZIP, or compare with PowerShell's Get-FileHash)
       - name: SHA256SUMS.txt
         shell: pwsh
