@@ -1,38 +1,39 @@
-# Contributing
+# Contribuir / Contributing
 
-Thanks for helping! Issues and pull requests are welcome: bugs in a level, rendering differences, missing HLE
-functions, performance, the launcher, Linux support.
+## 🇧🇷 Português
 
-Questions and ideas go to [Discussions](https://github.com/DrummingBird1/gow-psp-recomp/discussions); Issues are for bugs.
+Obrigado por ajudar no God of War PSP Recomp Android! Sugestões, relatos de erros e Pull Requests são bem-vindos.
 
-## Ground rules
+### Regras importantes
+- **Nunca envie conteúdo do jogo:** não inclua arquivos ISO/CHD, EBOOT, arquivos extraídos, saves, dumps de memória, código gerado a partir do jogo, capturas ou gravações do jogo.
+- Não publique dados pessoais em logs. Revise os arquivos antes de anexá-los.
+- Respeite as licenças do projeto e de todas as dependências de terceiros.
+- Faça alterações pequenas e explique claramente o motivo.
+- Não altere comandos, IDs de pacote, assinatura, nomes de artefatos ou etapas de compilação sem necessidade e sem testar.
 
-> **Never attach game files** to issues, pull requests or discussions: no disc images, EBOOTs, saves from the game
-> folder, generated C, memory dumps, or screenshots and videos of the game. To show a bug, attach the recorded input
-> (`--record-input file.txt`) and say which level and what happens.
+### Antes de enviar uma alteração
+1. Explique o problema ou melhoria e vincule uma Issue, se existir.
+2. Teste as mudanças no Android sempre que possível.
+3. Informe aparelho, versão do Android e passos de teste.
+4. Atualize o README ou o CHANGELOG quando a mudança afetar o usuário.
 
-- **Never commit game content.** No disc images, EBOOT/PRX dumps, generated C (`build/gen`), memory images, Ghidra
-  projects, extracted files, screenshots or recordings of the game. `.gitignore` covers the usual places; check
-  `git status` before you commit. Pull requests that contain game data are closed.
-- Third-party code keeps its license. PPSSPP-derived code (GPL-2.0-or-later) is fine; say where it comes from in a comment.
-  New dependencies are downloaded by CMake with a pinned version and SHA-256, like the existing ones.
-- Match the surrounding code: C11 for the runtime, comments that say why, no dead code or debug leftovers.
+Use a página de [Issues](https://github.com/flavinxs0/gow-psp-recomp-android/issues) para problemas e sugestões, e [Pull Requests](https://github.com/flavinxs0/gow-psp-recomp-android/pulls) para propor alterações.
 
-## Building and testing
+## 🇺🇸 English
 
-Follow the quick start in `README.md` (or `recomp/README.md` for the details). Before a pull request:
+Thanks for helping with God of War PSP Recomp Android! Bug reports, suggestions, and pull requests are welcome.
 
-- **Renderer or GE changes:** the software renderer must stay pixel-identical. Run a reference session
-  (`--frames-dir ... --frames-every 200`) before and after and compare with `tools/check_frames.py`. For the GPU
-  renderer, compare `--renderer gpu` frames the same way at `--res-scale 1`.
-- **Game logic, HLE, timing:** headless runs are deterministic. A recorded session (`--record-input`, `tools/replay.cmd`)
-  must give the same frames and the same `--wav` before and after, unless the change is meant to alter timing.
-- **Many levels at once:** `tools/level_tour.py --game coo|gos` warps into every level and reports crashes, missing HLE
-  functions and missing files.
-- Say in the pull request what you ran and what you saw (frame counts, PSNR, FPS).
+### Important rules
+- **Never upload game content:** do not include ISO/CHD files, EBOOTs, extracted files, saves, memory dumps, generated game code, or screenshots/recordings of the game.
+- Do not expose personal information in logs. Review files before attaching them.
+- Respect the project's licenses and all third-party dependency licenses.
+- Keep changes focused and explain why they are needed.
+- Do not change commands, package IDs, signing, artifact names, or build steps without a clear need and testing.
 
-## Versions
+### Before submitting a change
+1. Explain the issue or improvement and link an Issue, if available.
+2. Test the changes on Android whenever possible.
+3. Include the device, Android version, and test steps.
+4. Update the README or CHANGELOG when the change affects users.
 
-Releases are numbered `vMAJOR.MINOR.PATCH`, roughly following semantic versioning: usually a new feature bumps MINOR
-and a fix PATCH, but the maintainer may pick a bigger step for a release that bundles several changes (as v1.1.5 did). Add a line to
-`CHANGELOG.md` under "Unreleased"; a release moves those lines under a new version and gets a git tag and a GitHub release.
+Use [Issues](https://github.com/flavinxs0/gow-psp-recomp-android/issues) for problems and suggestions, and [Pull Requests](https://github.com/flavinxs0/gow-psp-recomp-android/pulls) to propose changes.
