@@ -623,6 +623,10 @@ public final class GameActivity extends SDLActivity {
                 for (int i = 0; i < N; i++) {
                     if (want[i] && !held[i]) {
                         held[i] = true;
+                        SharedPreferences vibrationPrefs = getContext().getSharedPreferences("gow_settings", Context.MODE_PRIVATE);
+                        if (vibrationPrefs.getBoolean("ctl_vibration", true)) {
+                            performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY);
+                        }
                         sink.down(codes[i]);
                     } else if (!want[i] && held[i]) {
                         held[i] = false;
