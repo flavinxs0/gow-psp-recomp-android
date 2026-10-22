@@ -274,6 +274,60 @@ public final class LauncherActivity extends Activity {
             case "Nenhum log para limpar.": return "No log to clear.";
             case "Log apagado.": return "Log deleted.";
             case "Não foi possível apagar o log.": return "Could not delete the log.";
+
+            case "Desempenho / HUD": return "Performance / HUD";
+            case "FPS": return "FPS";
+            case "Tempo de quadro": return "Frame time";
+            case "Memória (RAM)": return "Memory (RAM)";
+            case "Opacidade": return "Opacity";
+            case "20–100%": return "20–100%";
+            case "Controles na tela": return "On-screen controls";
+            case "Direção, analógico e botões": return "D-pad, analog stick and buttons";
+            case "Estilo dos botões": return "Button style";
+            case "Vale na próxima vez que tocar em JOGAR": return "Applies the next time you tap PLAY";
+            case "Automático": return "Automatic";
+            case "Oculta os controles na tela ao conectar um controle": return "Hide on-screen controls when a controller connects";
+            case "Controle detectado": return "Detected controller";
+            case "Não conectado": return "Not connected";
+            case "Nenhum controle físico": return "No physical controller";
+            case "Opacidade dos controles": return "Control opacity";
+            case "Zona morta do analógico": return "Analog stick dead zone";
+            case "Ajustável: 0% a 50%": return "Adjustable: 0% to 50%";
+            case "Editor de controles individuais": return "Individual control editor";
+            case "Personalize a posição dos botões durante a partida": return "Customize button positions during gameplay";
+            case "Restaurar posição": return "Reset positions";
+            case "Voltar ao layout original": return "Restore original layout";
+            case "Como usar": return "How to use";
+            case "Vibração do controle": return "Controller vibration";
+            case "Vibra ao tocar nos controles na tela": return "Vibrate when touching on-screen controls";
+            case "Gráficos": return "Graphics";
+            case "Desempenho / HUD": return "Performance / HUD";
+            case "Proporção da tela": return "Screen aspect ratio";
+            case "Tela cheia": return "Fullscreen";
+            case "Aplicar": return "Apply";
+            case "Cancelar": return "Cancel";
+            case "Voltar": return "Back";
+            case "Restaurar posição": return "Reset positions";
+            case "Posições originais restauradas.": return "Original positions restored.";
+            case "Mapeamento padrão restaurado. Vale ao abrir o jogo novamente.": return "Default mapping restored. Takes effect the next time you open the game.";
+            case "Padrões restaurados.": return "Defaults restored.";
+            case "Confirmar restauração": return "Confirm reset";
+            case "Voltar sem alterar": return "Back without changes";
+            case "RESTAURAR AGORA": return "RESET NOW";
+            case "RESTAURAR PADRÕES": return "RESTORE DEFAULTS";
+            case "Backup": return "Back up";
+            case "Restaurar saves": return "Restore saves";
+            case "Verificar atualizações": return "Check for updates";
+            case "Atualização": return "Update";
+            case "Não foi possível verificar atualizações.": return "Could not check for updates.";
+            case "Idioma": return "Language";
+            case "Português": return "Portuguese";
+            case "English": return "English";
+            case "Gráficos": return "Graphics";
+            case "Desempenho": return "Performance";
+            case "Extras": return "Extras";
+            case "Sobre": return "About";
+
             case "FECHAR": return "CLOSE";
             case "CANCELAR": return "CANCEL";
             case "SALVAR": return "SAVE";
@@ -407,7 +461,7 @@ public final class LauncherActivity extends Activity {
     }
 
     private void toast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, tr(message), Toast.LENGTH_LONG).show();
     }
 
     private TextView button(String label, boolean primary, final Runnable action) {
@@ -474,8 +528,8 @@ public final class LauncherActivity extends Activity {
         LinearLayout line = rowLayout();
         line.setPadding(0, dp(12), 0, dp(12));
         LinearLayout names = column();
-        names.addView(tv(label, 16, TEXT, false), wrapWrap());
-        if (sub != null) names.addView(tv(sub, 11, MUTED, false), wrapWrap());
+        names.addView(tv(tr(label), 16, TEXT, false), wrapWrap());
+        if (sub != null) names.addView(tv(tr(sub), 11, MUTED, false), wrapWrap());
         line.addView(names, weight(1f));
         if (control != null) {
             if (control instanceof android.widget.SeekBar) {
@@ -1191,6 +1245,8 @@ public final class LauncherActivity extends Activity {
                 padState, false));
         right.addView(row("Opacidade dos controles", "20–100%",
                 controlOpacityControl(p), false));
+        right.addView(row("Vibração do controle", "Vibra ao tocar nos controles na tela",
+                toggle(p.getBoolean("ctl_vibration", true), on -> p.edit().putBoolean("ctl_vibration", on).apply()), false));
         left.addView(row("Zona morta do anal\u00f3gico", "Ajustável: 0% a 50%",
                 deadZoneControl(p), false));
         right.addView(row("Editor de controles individuais", "Personalize a posição dos botões durante a partida",
