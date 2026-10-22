@@ -16,7 +16,7 @@ An independent community port to run the native recompilation of **God of War: C
 
 ### Sobre o projeto
 
-O objetivo é disponibilizar uma versão Android do projeto de recompilação, com um inicializador próprio, controles por toque e opções de exibição. O projeto está em desenvolvimento; compatibilidade e desempenho podem variar de acordo com o aparelho.
+O objetivo é disponibilizar uma versão Android do projeto de recompilação, com um inicializador próprio, controles por toque e opções de exibição. Compatibilidade e desempenho podem variar de acordo com o aparelho.
 
 ### Recursos
 
@@ -25,7 +25,7 @@ O objetivo é disponibilizar uma versão Android do projeto de recompilação, c
 - Controles por toque na tela.
 - Opções gráficas e de proporção de tela disponíveis na compilação.
 - Compilação nativa Android ARM64 com SDL3.
-- Projeto voltado para testes e melhorias contínuas.
+- Projeto comunitário com melhorias contínuas de compatibilidade e desempenho.
 
 ### Instalação
 
@@ -38,7 +38,7 @@ Se o Android bloquear a instalação, confira as permissões para instalar aplic
 
 ### Atualizações
 
-As novas versões serão publicadas na página de [Releases](https://github.com/flavinxs0/gow-psp-recomp-android/releases). Um verificador de atualizações dentro do aplicativo é uma melhoria planejada; até estar implementado, consulte a página de lançamentos manualmente.
+As novas versões serão publicadas na página de [Releases](https://github.com/flavinxs0/gow-psp-recomp-android/releases). O launcher inclui uma opção para consultar a versão mais recente e abrir o download pelo GitHub.
 
 ### Relatar um problema
 
@@ -56,7 +56,7 @@ Leia [CONTRIBUTING.md](CONTRIBUTING.md) antes de enviar alterações. Mudanças 
 
 ### About
 
-The goal is to provide an Android version of the recompilation project, with a custom launcher, on-screen touch controls, and display options. This project is under development; compatibility and performance may vary by device.
+The goal is to provide an Android version of the recompilation project, with a custom launcher, on-screen touch controls, and display options. Compatibility and performance may vary by device.
 
 ### Features
 
@@ -65,7 +65,7 @@ The goal is to provide an Android version of the recompilation project, with a c
 - On-screen touch controls.
 - Graphics and aspect-ratio options available in the build.
 - Native Android ARM64 build using SDL3.
-- Ongoing community testing and improvements.
+- Ongoing community improvements to compatibility and performance.
 
 ### Installation
 
@@ -78,7 +78,7 @@ If Android blocks installation, check the permission to install apps for the sou
 
 ### Updates
 
-New versions will be published on the [Releases](https://github.com/flavinxs0/gow-psp-recomp-android/releases) page. An in-app update checker is planned; until it is implemented, visit the releases page manually.
+New versions will be published on the [Releases](https://github.com/flavinxs0/gow-psp-recomp-android/releases) page. The launcher includes an option to check the latest version and open its download on GitHub.
 
 ### Report a problem
 
