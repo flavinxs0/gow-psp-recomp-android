@@ -1356,7 +1356,10 @@ public final class LauncherActivity extends Activity {
                 actions(new String[] { "Gerenciar" }, new Runnable[] { this::showGameFiles }, false), false));
         right.addView(row("Restaurar padr\u00f5es", "Volta todas as configura\u00e7\u00f5es ao original",
                 actions(new String[] { "Restaurar" }, new Runnable[] { this::confirmReset }, true), false));
-                right.addView(row("Idioma", null, seg(new String[] { "Portugu\\u00eas", "English" }, "en".equals(prefs().getString("language", "pt")) ? 1 : 0, i -> {\n            prefs().edit().putString("language", i == 1 ? "en" : "pt").apply();\n            showExtras();\n        }), false));\n        right.addView(row("Verificar atualizações", "Consultar a versão mais recente do APK no GitHub",
+                right.addView(row("Idioma", null, seg(new String[] { "Portugu\u00eas", "English" }, "en".equals(prefs().getString("language", "pt")) ? 1 : 0, i -> {
+            prefs().edit().putString("language", i == 1 ? "en" : "pt").apply();
+            showExtras();
+        }), false));\n        right.addView(row("Verificar atualizações", "Consultar a versão mais recente do APK no GitHub",
                 actions(new String[] { "Verificar" }, new Runnable[] { this::checkForUpdates }, false), false));
         showScreen("extras", "Extras", left, right);
     }
