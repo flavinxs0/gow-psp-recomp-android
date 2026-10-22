@@ -191,7 +191,7 @@ public final class GameActivity extends SDLActivity {
                                 if (finishEditButton != null) finishEditButton.setVisibility(View.VISIBLE);
                             })
                             .setNegativeButton(tr("Cancelar", "Cancel"), null).show();
-                }).setNegativeButton("Cancelar", null).show();
+                }).setNegativeButton(tr("Cancelar", "Cancel"), null).show();
     }
 
     private void showInGameHudEditor() {
