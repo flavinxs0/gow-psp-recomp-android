@@ -59,7 +59,7 @@ published, and grew to include the launcher, quit and movie-skip changes below. 
 
 ## v1.0.1 (2026-10-17)
 
-Still a preview: every level loads and runs and saves work, but neither game has had a full playthrough yet.
+Coverage note: every level loads and runs and saves work, but a complete playthrough of either game has not yet been recorded.
 
 - **Download is now a ZIP:** `GoW_PSP_Launcher-v1.0.1.zip` holds one `GoW_PSP` folder with `GoWLauncher.exe` and a
   short `README.txt`. The launcher keeps everything it creates in `GoW_PSP_data` next to itself; folders set up by
@@ -74,8 +74,7 @@ Still a preview: every level loads and runs and saves work, but neither game has
   original social preview image. CI uploads the release ZIP.
 ## v1.0.0 (2026-10-17)
 
-**Preview:** every level of both games loads and runs and saves work, but neither game has had a full playthrough
-yet. Play from your disc image without Python or a manual EBOOT dump.
+Coverage note: every level of both games loads and runs and saves work, but a complete playthrough of either game has not yet been recorded. Play from your disc image without Python or a manual EBOOT dump.
 
 - **EBOOT decryption built in:** `gow_disc` reads the `.chd` / `.iso`, identifies the game and decrypts the EBOOT
   (PPSSPP PrxDecrypter + libkirk, fetched at build time with a pinned SHA-256); no PPSSPP dump needed.
