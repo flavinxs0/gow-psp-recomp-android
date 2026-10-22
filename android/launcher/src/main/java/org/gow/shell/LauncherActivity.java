@@ -477,14 +477,7 @@ public final class LauncherActivity extends Activity {
         names.addView(tv(label, 16, TEXT, false), wrapWrap());
         if (sub != null) names.addView(tv(sub, 11, MUTED, false), wrapWrap());
         line.addView(names, weight(1f));
-        if (soon) {
-            TextView s = tv("Em breve...", 13, MUTED, false);
-            s.setTypeface(Typeface.create("sans-serif", Typeface.ITALIC));
-            s.setPadding(0, 0, dp(10), 0);
-            line.addView(s, wrapWrap());
-        }
         if (control != null) {
-            if (soon) disable(control);
             if (control instanceof android.widget.SeekBar) {
                 line.addView(control, new LinearLayout.LayoutParams(dp(190), dp(36)));
             } else {
