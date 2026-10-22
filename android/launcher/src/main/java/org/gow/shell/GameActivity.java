@@ -120,21 +120,21 @@ public final class GameActivity extends SDLActivity {
         gameDrawer.setBackground(drawerBackground());
         gameDrawer.setElevation(dp(41));
         TextView title = new TextView(this);
-        title.setText("MENU DO JOGO");
+        title.setText(tr("MENU DO JOGO", "GAME MENU"));
         title.setTextColor(Color.rgb(235, 70, 85));
         title.setTextSize(15);
         title.setTypeface(null, android.graphics.Typeface.BOLD);
         gameDrawer.addView(title, new LinearLayout.LayoutParams(-1, dp(42)));
-        addDrawerButton("Sair do game", () -> { if (controls != null) controls.releaseAll(); finish(); });
-        addDrawerButton("Editar controles na tela", this::showInGameControlEditor);
-        addDrawerButton("Editar HUD de FPS", this::showInGameHudEditor);
+        addDrawerButton(tr("Sair do game", "Exit game"), () -> { if (controls != null) controls.releaseAll(); finish(); });
+        addDrawerButton(tr("Editar controles na tela", "Edit on-screen controls"), this::showInGameControlEditor);
+        addDrawerButton(tr("Editar HUD de FPS", "Edit FPS HUD"), this::showInGameHudEditor);
         FrameLayout.LayoutParams drawerLp = new FrameLayout.LayoutParams(dp(270), -1, Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         drawerLp.setMargins(0, dp(12), dp(28), dp(12));
         gameDrawer.setVisibility(View.GONE);
         addContentView(gameDrawer, drawerLp);
 
         finishEditButton = new Button(this);
-        finishEditButton.setText("Concluir edição");
+        finishEditButton.setText(tr("Concluir edição", "Finish editing"));
         finishEditButton.setAllCaps(false);
         finishEditButton.setTextColor(Color.WHITE);
         finishEditButton.setBackground(drawerBackground());
@@ -178,19 +178,19 @@ public final class GameActivity extends SDLActivity {
         final String[] profiles = { "PlayStation", "Xbox" };
         int current = "xbox".equals(prefs.getString("ctl_style", "ps")) ? 1 : 0;
         new android.app.AlertDialog.Builder(this)
-                .setTitle("Editar controles na tela")
+                .setTitle(tr("Editar controles na tela", "Edit on-screen controls"))
                 .setSingleChoiceItems(profiles, current, (dialog, which) -> {
                     prefs.edit().putString("ctl_style", which == 1 ? "xbox" : "ps").apply();
                     if (controls != null) controls.setControllerStyle(which == 1);
                     dialog.dismiss();
                     new android.app.AlertDialog.Builder(this)
                             .setTitle(profiles[which])
-                            .setMessage("Entre no modo de edição e arraste o botão desejado. Toque em Concluir para salvar.")
-                            .setPositiveButton("Editar", (d, w) -> {
+                            .setMessage(tr("Entre no modo de edição e arraste o botão desejado. Toque em Concluir para salvar.", "Enter edit mode and drag the button you want. Tap Finish editing to save."))
+                            .setPositiveButton(tr("Editar", "Edit"), (d, w) -> {
                                 if (controls != null) controls.setEditMode(true);
                                 if (finishEditButton != null) finishEditButton.setVisibility(View.VISIBLE);
                             })
-                            .setNegativeButton("Cancelar", null).show();
+                            .setNegativeButton(tr("Cancelar", "Cancel"), null).show();
                 }).setNegativeButton("Cancelar", null).show();
     }
 
@@ -198,22 +198,22 @@ public final class GameActivity extends SDLActivity {
         LinearLayout box = new LinearLayout(this);
         box.setPadding(dp(20), dp(8), dp(20), dp(8));
         box.setOrientation(LinearLayout.VERTICAL);
-        android.widget.Switch enabled = hudSwitch("Mostrar HUD de desempenho", "performance_hud_enabled", true);
+        android.widget.Switch enabled = hudSwitch(tr("Mostrar HUD de desempenho", "Show performance HUD"), "performance_hud_enabled", true);
         android.widget.Switch fps = hudSwitch("FPS", "performance_hud_fps", true);
-        android.widget.Switch frame = hudSwitch("Tempo de quadro", "performance_hud_frame_time", true);
-        android.widget.Switch ram = hudSwitch("RAM utilizada", "performance_hud_ram", true);
+        android.widget.Switch frame = hudSwitch(tr("Tempo de quadro", "Frame time"), "performance_hud_frame_time", true);
+        android.widget.Switch ram = hudSwitch(tr("RAM utilizada", "RAM usage"), "performance_hud_ram", true);
         android.widget.Switch compact = new android.widget.Switch(this);
-        compact.setText("Exibição compacta em uma linha");
+        compact.setText(tr("Exibição compacta em uma linha", "Compact single-line display"));
         compact.setTextColor(Color.WHITE);
         compact.setChecked(prefs.getInt("performance_hud_style", 0) == 1);
         android.widget.Switch right = new android.widget.Switch(this);
-        right.setText("Posicionar à direita");
+        right.setText(tr("Posicionar à direita", "Align right"));
         right.setTextColor(Color.WHITE);
         right.setChecked(prefs.getInt("performance_hud_position", 0) == 1);
         box.addView(enabled); box.addView(fps); box.addView(frame); box.addView(ram);
         box.addView(compact); box.addView(right);
         TextView opacityLabel = new TextView(this);
-        opacityLabel.setText("Opacidade do HUD");
+        opacityLabel.setText(tr("Opacidade do HUD", "HUD opacity"));
         opacityLabel.setTextColor(Color.WHITE);
         box.addView(opacityLabel);
         SeekBar opacity = new SeekBar(this);
@@ -224,8 +224,8 @@ public final class GameActivity extends SDLActivity {
             opacity.setThumbTintList(android.content.res.ColorStateList.valueOf(Color.rgb(235,70,85)));
         }
         box.addView(opacity);
-        new android.app.AlertDialog.Builder(this).setTitle("Editar HUD de FPS").setView(box)
-                .setPositiveButton("Salvar", (d, w) -> {
+        new android.app.AlertDialog.Builder(this).setTitle(tr("Editar HUD de FPS", "Edit FPS HUD")).setView(box)
+                .setPositiveButton(tr("Salvar", "Save"), (d, w) -> {
                     prefs.edit().putBoolean("performance_hud_enabled", enabled.isChecked())
                             .putBoolean("performance_hud_fps", fps.isChecked())
                             .putBoolean("performance_hud_frame_time", frame.isChecked())
@@ -243,6 +243,10 @@ public final class GameActivity extends SDLActivity {
         toggle.setTextColor(Color.WHITE);
         toggle.setChecked(prefs.getBoolean(key, defaultValue));
         return toggle;
+    }
+
+    private String tr(String portuguese, String english) {
+        return prefs != null && "en".equals(prefs.getString("language", "pt")) ? english : portuguese;
     }
 
     private int dp(float value) { return Math.round(value * getResources().getDisplayMetrics().density); }
