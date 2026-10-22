@@ -300,14 +300,11 @@ public final class LauncherActivity extends Activity {
             case "Como usar": return "How to use";
             case "Vibração do controle": return "Controller vibration";
             case "Vibra ao tocar nos controles na tela": return "Vibrate when touching on-screen controls";
-            case "Gráficos": return "Graphics";
-            case "Desempenho / HUD": return "Performance / HUD";
             case "Proporção da tela": return "Screen aspect ratio";
             case "Tela cheia": return "Fullscreen";
             case "Aplicar": return "Apply";
             case "Cancelar": return "Cancel";
             case "Voltar": return "Back";
-            case "Restaurar posição": return "Reset positions";
             case "Posições originais restauradas.": return "Original positions restored.";
             case "Mapeamento padrão restaurado. Vale ao abrir o jogo novamente.": return "Default mapping restored. Takes effect the next time you open the game.";
             case "Padrões restaurados.": return "Defaults restored.";
@@ -315,18 +312,11 @@ public final class LauncherActivity extends Activity {
             case "Voltar sem alterar": return "Back without changes";
             case "RESTAURAR AGORA": return "RESET NOW";
             case "RESTAURAR PADRÕES": return "RESTORE DEFAULTS";
-            case "Backup": return "Back up";
             case "Restaurar saves": return "Restore saves";
-            case "Verificar atualizações": return "Check for updates";
             case "Atualização": return "Update";
             case "Não foi possível verificar atualizações.": return "Could not check for updates.";
-            case "Idioma": return "Language";
-            case "Português": return "Portuguese";
             case "English": return "English";
-            case "Gráficos": return "Graphics";
             case "Desempenho": return "Performance";
-            case "Extras": return "Extras";
-            case "Sobre": return "About";
 
             case "FECHAR": return "CLOSE";
             case "CANCELAR": return "CANCEL";
@@ -1809,7 +1799,7 @@ public final class LauncherActivity extends Activity {
 
     private void resetDefaults() {
         prefs().edit().remove("res_scale").remove("fxaa").remove("fps_limit").remove("vsync")
-                .remove("performance_hud_enabled").remove("performance_hud_fps").remove("performance_hud_frame_time").remove("performance_hud_ram").remove("performance_hud_style").remove("performance_hud_position").remove("performance_hud_opacity").remove("ctl_screen").remove("ctl_auto").remove("ctl_opacity").remove("ctl_style").remove("ctl_deadzone").remove("ctl_map_cross").remove("ctl_map_circle").remove("ctl_map_square").remove("ctl_map_triangle").putString("screen_mode", "16:9").apply();
+                .remove("performance_hud_enabled").remove("performance_hud_fps").remove("performance_hud_frame_time").remove("performance_hud_ram").remove("performance_hud_style").remove("performance_hud_position").remove("performance_hud_opacity").remove("ctl_screen").remove("ctl_auto").remove("ctl_opacity").remove("ctl_style").remove("ctl_deadzone").remove("ctl_map_cross").remove("ctl_map_circle").remove("ctl_map_square").remove("ctl_map_triangle").remove("ctl_vibration").putString("screen_mode", "16:9").apply();
         writeLine(join(filterTokens(readArgTokens(), true, true, true, true)));
     }
 }
