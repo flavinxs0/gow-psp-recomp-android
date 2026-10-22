@@ -316,6 +316,16 @@ public final class LauncherActivity extends Activity {
             case "Atualização": return "Update";
             case "Não foi possível verificar atualizações.": return "Could not check for updates.";
             case "English": return "English";
+            case "Mostrar HUD em jogo": return "Show in-game HUD";
+            case "Mostra HUD em jogo": return "Show in-game HUD";
+            case "Estilo": return "Style";
+            case "Posição": return "Position";
+            case "Instalar arquivos do jogo": return "Install game files";
+            case "Instalar arquivos do jogo e o jogar": return "Install game files and Play";
+            case "Jogar": return "Play";
+            case "Escala de resolução": return "Resolution scale";
+            case "Limite de FPS": return "FPS limit";
+            case "Escala da resolução": return "Resolution scale";
             case "Desempenho": return "Performance";
 
             case "FECHAR": return "CLOSE";
