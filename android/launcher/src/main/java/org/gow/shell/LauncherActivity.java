@@ -223,9 +223,68 @@ public final class LauncherActivity extends Activity {
         return d;
     }
 
+    private String tr(String value) {
+        if (!"en".equals(prefs().getString("language", "pt"))) return value;
+        switch (value) {
+            case "Iniciar jogo": return "Start Game";
+            case "Continuar": return "Continue";
+            case "Gráficos": return "Graphics";
+            case "HUD de desempenho": return "Performance HUD";
+            case "Controles": return "Controls";
+            case "Idioma": return "Language";
+            case "Português": return "Portuguese";
+            case "Mapeamento dos botões": return "Button Mapping";
+            case "COMO USAR": return "HOW TO USE";
+            case "Abra uma partida": return "Start a game";
+            case "Puxe a aba lateral na borda direita": return "Open the side tab on the right edge";
+            case "Toque em Editar controles na tela": return "Tap Edit on-screen controls";
+            case "Escolha PlayStation ou Xbox e arraste cada botão": return "Choose PlayStation or Xbox and drag each button";
+            case "Toque em Concluir edição para voltar a jogar": return "Tap Finish editing to resume playing";
+            case "Entendi": return "Got it";
+            case "Saves": return "Saves";
+            case "Backup": return "Back up";
+            case "Restaurar": return "Restore";
+            case "Logs": return "Logs";
+            case "Compartilhar": return "Share";
+            case "Limpar": return "Clear";
+            case "Argumentos avançados": return "Advanced arguments";
+            case "Editar": return "Edit";
+            case "Arquivos do jogo": return "Game files";
+            case "Gerenciar": return "Manage";
+            case "Restaurar padrões": return "Restore defaults";
+            case "Verificar atualizações": return "Check for updates";
+            case "Verificar": return "Check";
+            case "Argumentos atuais (args.txt)": return "Current arguments (args.txt)";
+            case "Disco": return "Disc";
+            case "Versão": return "Version";
+            case "Aparelho": return "Device";
+            case "Arquitetura": return "Architecture";
+            case "Código-fonte": return "Source code";
+            case "Projeto no GitHub": return "Project on GitHub";
+            case "Licenças": return "Licenses";
+            case "Aviso": return "Notice";
+            case "Sobre": return "About";
+            case "Extras": return "Extras";
+            case "Ver": return "View";
+            case "Nenhum navegador encontrado.": return "No browser found.";
+            case "Nenhum save encontrado ainda.": return "No saves found yet.";
+            case "Nenhum backup encontrado.": return "No backup found.";
+            case "Saves restaurados.": return "Saves restored.";
+            case "Falha ao restaurar.": return "Restore failed.";
+            case "Nenhum log para limpar.": return "No log to clear.";
+            case "Log apagado.": return "Log deleted.";
+            case "Não foi possível apagar o log.": return "Could not delete the log.";
+            case "FECHAR": return "CLOSE";
+            case "CANCELAR": return "CANCEL";
+            case "SALVAR": return "SAVE";
+            case "OK": return "OK";
+            default: return value;
+        }
+    }
+
     private TextView tv(String value, int size, int color, boolean bold) {
         TextView t = new TextView(this);
-        t.setText(value);
+        t.setText(tr(value));
         t.setTextSize(size);
         t.setTextColor(color);
         t.setTypeface(Typeface.create("sans-serif", bold ? Typeface.BOLD : Typeface.NORMAL));
@@ -1297,8 +1356,7 @@ public final class LauncherActivity extends Activity {
                 actions(new String[] { "Gerenciar" }, new Runnable[] { this::showGameFiles }, false), false));
         right.addView(row("Restaurar padr\u00f5es", "Volta todas as configura\u00e7\u00f5es ao original",
                 actions(new String[] { "Restaurar" }, new Runnable[] { this::confirmReset }, true), false));
-        right.addView(row("Idioma", null, seg(new String[] { "Portugu\u00eas", "English" }, 0, i -> { }), true));
-        right.addView(row("Verificar atualizações", "Consultar a versão mais recente do APK no GitHub",
+                right.addView(row("Idioma", null, seg(new String[] { "Portugu\\u00eas", "English" }, "en".equals(prefs().getString("language", "pt")) ? 1 : 0, i -> {\n            prefs().edit().putString("language", i == 1 ? "en" : "pt").apply();\n            showExtras();\n        }), false));\n        right.addView(row("Verificar atualizações", "Consultar a versão mais recente do APK no GitHub",
                 actions(new String[] { "Verificar" }, new Runnable[] { this::checkForUpdates }, false), false));
         showScreen("extras", "Extras", left, right);
     }
