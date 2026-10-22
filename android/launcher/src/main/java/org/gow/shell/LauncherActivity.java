@@ -301,6 +301,7 @@ public final class LauncherActivity extends Activity {
             case "Vibração do controle": return "Controller vibration";
             case "Vibra ao tocar nos controles na tela": return "Vibrate when touching on-screen controls";
             case "Proporção da tela": return "Screen aspect ratio";
+            case "Proporção de tela": return "Screen aspect ratio";
             case "Tela cheia": return "Fullscreen";
             case "Aplicar": return "Apply";
             case "Cancelar": return "Cancel";
