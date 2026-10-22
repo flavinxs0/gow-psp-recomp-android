@@ -1198,7 +1198,6 @@ public final class LauncherActivity extends Activity {
                 padState, false));
         right.addView(row("Opacidade dos controles", "20–100%",
                 controlOpacityControl(p), false));
-        right.addView(row("Vibra\u00e7\u00e3o do controle", null, toggle(true, on -> { }), true));
         left.addView(row("Zona morta do anal\u00f3gico", "Ajustável: 0% a 50%",
                 deadZoneControl(p), false));
         right.addView(row("Editor de controles individuais", "Personalize a posição dos botões durante a partida",
@@ -1359,7 +1358,8 @@ public final class LauncherActivity extends Activity {
                 right.addView(row("Idioma", null, seg(new String[] { "Portugu\u00eas", "English" }, "en".equals(prefs().getString("language", "pt")) ? 1 : 0, i -> {
             prefs().edit().putString("language", i == 1 ? "en" : "pt").apply();
             showExtras();
-        }), false));\n        right.addView(row("Verificar atualizações", "Consultar a versão mais recente do APK no GitHub",
+        }), false));
+        right.addView(row("Verificar atualizações", "Consultar a versão mais recente do APK no GitHub",
                 actions(new String[] { "Verificar" }, new Runnable[] { this::checkForUpdates }, false), false));
         showScreen("extras", "Extras", left, right);
     }
