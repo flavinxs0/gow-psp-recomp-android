@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'runtime/rt_fiber.c'
+      - 'runtime/rt_android.c'
       - 'CMakeLists.txt'
       - '.github/workflows/build-ghost-of-sparta.yml'
 
