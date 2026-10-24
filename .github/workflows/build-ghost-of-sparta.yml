@@ -1,4 +1,5 @@
 name: "Teste Android — Ghost of Sparta (isolado)"
+# Disparo de teste usando o link novo do Google Drive.
 # Build manual e isolada de Ghost of Sparta; nunca reutiliza bibliotecas de Chains of Olympus.
 # ISO atualizada para o novo arquivo compartilhado pelo usuário.
 on:
@@ -17,7 +18,7 @@ permissions:
 env:
   GAME_ID: UCUS98737
   SDL_COMMIT: fa2c02bb6e21974a89ea9824bc53c9932abe5f9c
-  ISO_DRIVE_ID: 1ANlgMsZynUC50EGMt0AwPloK93D9uK4j
+  ISO_DRIVE_ID: 1ANlgMsZynUC50EGMt0AwPloK93D9uK4j # link novo enviado pelo Flavin
 
 jobs:
   build:
