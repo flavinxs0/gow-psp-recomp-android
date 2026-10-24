@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'runtime/rt_fiber.c'
+      - 'CMakeLists.txt'
       - '.github/workflows/build-ghost-of-sparta.yml'
 
 permissions:
@@ -108,7 +109,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DGAME="${GAME_ID}_full" -DGOW_ANDROID=ON \
             -DGOW_SDL_SO="$PWD/build-sdl/libSDL3.so" \
-            -DCMAKE_SHARED_LINKER_FLAGS="-L$PWD/stubs"
+            -DCMAKE_SHARED_LINKER_FLAGS="-L$PWD/stubs" \
+            -DCMAKE_EXE_LINKER_FLAGS="-L$PWD/stubs"
           cmake --build build/cmake_android --parallel
           find build/cmake_android -name 'libmain.so' -type f
 
