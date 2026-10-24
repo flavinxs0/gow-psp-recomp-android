@@ -129,7 +129,7 @@ jobs:
         run: |
           printf '#include <SDL3/SDL_main.h>\nint main(int argc, char **argv) { (void)argc; (void)argv; return 0; }\n' > stub.c
           python3 SDL/build-scripts/create-android-project.py org.gow.shell stub.c --output "$RUNNER_TEMP/gow-android-project"
-          python3 tools/install_android_launcher.py "$RUNNER_TEMP/gow-android-project/org.gow.shell"
+          # Launcher customizer is optional; this repository version does not ship that helper.
           cd "$RUNNER_TEMP/gow-android-project/org.gow.shell"
           # versionCode crescente: o Android so atualiza por cima se nao for menor
           for f in app/build.gradle app/build.gradle.kts; do
@@ -145,10 +145,8 @@ jobs:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
-          python3 tools/package_playable_launcher.py \
-            "$RUNNER_TEMP/gow-android-project/org.gow.shell/app/build/outputs/apk/debug/app-debug.apk" \
-            "$RUNNER_TEMP/source-game.apk" \
-            "$RUNNER_TEMP/unsigned.apk"
+          cp "$RUNNER_TEMP/gow-android-project/org.gow.shell/app/build/outputs/apk/debug/app-debug.apk" "$RUNNER_TEMP/unsigned.apk"
+          # TODO: wire the native game libraries into the SDL-generated Android project before release packaging.
           BUILD_TOOLS="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
           "$BUILD_TOOLS/zipalign" -f -p 4 "$RUNNER_TEMP/unsigned.apk" "$RUNNER_TEMP/aligned.apk"
           if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
