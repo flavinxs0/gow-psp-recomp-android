@@ -39,7 +39,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m pip install --break-system-packages -q gdown
-          python3 -m gdown '1_LZlT3USCtfyBGkAazSqOTIdw0KazyUq' -O game.iso
+          python3 -m gdown '1M1VhAqqzADMsocLffJ8x2tD8-5PbdADS' -O game.iso
           test -s game.iso
           SIZE="$(stat -c%s game.iso)"
           if [ "$SIZE" -le 50000000 ]; then
