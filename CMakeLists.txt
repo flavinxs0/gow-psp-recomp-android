@@ -31,7 +31,12 @@ macro(gow_fetch_archive name repo commit sha256)
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     SOURCE_DIR "${_gow_src}")
   FetchContent_MakeAvailable(${name})
-  file(TOUCH "${_gow_src}/.gow_complete")
+  # When FETCHCONTENT_SOURCE_DIR_<NAME> overrides the source (e.g. the prebuilt SDL checkout),
+  # FetchContent uses that external directory and may not create _gow_src. Only mark the pinned
+  # archive complete when its actual source directory exists.
+  if(IS_DIRECTORY "${_gow_src}")
+    file(TOUCH "${_gow_src}/.gow_complete")
+  endif()
 endmacro()
 
 # libchdr (BSD-3-Clause) reads the user's CHD disc images; pinned to a reviewed commit
