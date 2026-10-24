@@ -35,30 +35,65 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Baixar o disco (link secreto)
+      - name: Baixar o disco pelo Gofile
         env:
-          GOW_GOS_DISC_URL: ${{ secrets.GOW_GOS_DISC_URL }}
+          GOW_GOS_GOFILE_URL: https://gofile.io/d/C7AwFhXl
         run: |
-          test -n "$GOW_GOS_DISC_URL" || { echo "::error::Configure o secret GOW_GOS_DISC_URL."; exit 1; }
-          echo "::add-mask::$GOW_GOS_DISC_URL"
-          python3 -m pip install --break-system-packages -q --upgrade gdown
-          # Google Drive pode bloquear downloads grandes ou deixar a conexão presa; limite cada tentativa.
-          OK=0
-          for ATTEMPT in 1 2 3; do
-            rm -f game.iso
-            if timeout 90s gdown "$GOW_GOS_DISC_URL" -O game.iso; then
-              SIZE=$(stat -c%s game.iso 2>/dev/null || echo 0)
-              if [ "$SIZE" -gt 50000000 ]; then OK=1; break; fi
-            fi
-            echo "Tentativa $ATTEMPT/3 falhou; aguardando antes de tentar novamente."
-            sleep 12
-          done
-          if [ "$OK" -ne 1 ]; then
-            echo "::error::ISO Ghost of Sparta indisponível. Build cancelada sem fallback para outro jogo."
-            exit 1
-          fi
-          echo "ISO baixada: $(stat -c%s game.iso) bytes"
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, re, subprocess, sys, urllib.request
+          from urllib.error import HTTPError, URLError
 
+          share_url = "https://gofile.io/d/C7AwFhXl"
+          content_id = share_url.rstrip("/").split("/")[-1]
+          api_url = f"https://api.gofile.io/contents/{content_id}"
+          request = urllib.request.Request(api_url, headers={
+              "User-Agent": "Mozilla/5.0",
+              "Accept": "application/json",
+          })
+          try:
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  payload = json.load(response)
+          except Exception as exc:
+              print(f"::error::Não foi possível consultar o Gofile: {exc}")
+              sys.exit(1)
+
+          if payload.get("status") != "ok":
+              print("::error::A API pública do Gofile não retornou acesso ao conteúdo.")
+              print(json.dumps(payload)[:1500])
+              sys.exit(1)
+
+          data = payload.get("data", {})
+          children = data.get("children", {})
+          files = []
+          if isinstance(children, dict):
+              files = [v for v in children.values() if isinstance(v, dict) and v.get("type") == "file"]
+          elif isinstance(children, list):
+              files = [v for v in children if isinstance(v, dict) and v.get("type") == "file"]
+          if data.get("type") == "file":
+              files = [data]
+
+          iso = next((f for f in files if str(f.get("name", "")).lower().endswith((".iso", ".cso"))), None)
+          if not iso:
+              print("::error::Não encontrei arquivo ISO/CSO no compartilhamento do Gofile.")
+              print("Arquivos visíveis:", [f.get("name") for f in files])
+              sys.exit(1)
+
+          link = iso.get("link")
+          if not link:
+              print("::error::O Gofile não forneceu um link de download para a ISO.")
+              sys.exit(1)
+
+          print(f"Arquivo encontrado: {iso.get('name')} ({iso.get('size', 0)} bytes)")
+          subprocess.run(["curl", "-fL", "--retry", "3", "--connect-timeout", "30",
+                          "--max-time", "1800", link, "-o", "game.iso"], check=True)
+          import os
+          size = os.path.getsize("game.iso")
+          if size <= 50_000_000:
+              print(f"::error::Download incompleto ou arquivo inválido: {size} bytes")
+              sys.exit(1)
+          print(f"ISO baixada: {size} bytes")
+          PY
 
       - name: Ferramentas do host (gow_disc)
         run: |
