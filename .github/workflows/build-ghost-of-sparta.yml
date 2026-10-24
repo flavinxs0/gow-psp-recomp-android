@@ -38,12 +38,54 @@ jobs:
       - name: Baixar o disco pelo Google Drive
         run: |
           set -euo pipefail
-          python3 -m pip install --break-system-packages -q gdown
-          python3 -m gdown '1M1VhAqqzADMsocLffJ8x2tD8-5PbdADS' -O game.iso
+          python3 -m pip install --break-system-packages -q 'gdown>=6.1'
+          # Primeiro tenta o arquivo direto. Se o Drive bloquear por quota,
+          # lista os ISOs públicos da pasta informada e tenta cópias alternativas.
+          if python3 -m gdown '1M1VhAqqzADMsocLffJ8x2tD8-5PbdADS' -O game.iso; then
+            echo "Download direto concluído."
+          else
+            echo "::warning::Download direto falhou; tentando os arquivos ISO da pasta compartilhada."
+            rm -f game.iso
+            python3 -m gdown 'https://drive.google.com/drive/folders/14w9hEr93PW2K1fWxAlsZAFOfUi-CAIfF' --json --quiet > drive-folder.json
+            python3 - <<'PY' > iso_urls.txt
+          import json
+          with open("drive-folder.json", encoding="utf-8") as f:
+              entries = json.load(f)
+          candidates = [e for e in entries if str(e.get("path", "")).lower().endswith(".iso")]
+          # Preferir nomes que identifiquem Ghost of Sparta/UCUS98737.
+          candidates.sort(key=lambda e: 0 if any(k in str(e.get("path", "")).lower() for k in ("ghost", "ucus98737", "gos")) else 1)
+          for entry in candidates:
+              url = entry.get("url")
+              if url:
+                  print(url)
+          PY
+            if [ ! -s iso_urls.txt ]; then
+              echo "::error::A pasta não retornou arquivos ISO públicos. Verifique o compartilhamento da pasta e o nome do arquivo."
+              exit 1
+            fi
+            downloaded=0
+            while IFS= read -r URL; do
+              [ -n "$URL" ] || continue
+              rm -f game.iso
+              echo "Tentando um arquivo ISO listado na pasta..."
+              if python3 -m gdown "$URL" -O game.iso && [ -s game.iso ]; then
+                SIZE="$(stat -c%s game.iso)"
+                if [ "$SIZE" -gt 50000000 ]; then
+                  downloaded=1
+                  break
+                fi
+                echo "::warning::Arquivo baixado pequeno demais ($SIZE bytes); tentando o próximo."
+              fi
+            done < iso_urls.txt
+            if [ "$downloaded" -ne 1 ]; then
+              echo "::error::Nenhuma ISO da pasta pôde ser baixada com tamanho válido. O Drive pode estar aplicando limite de tráfego."
+              exit 1
+            fi
+          fi
           test -s game.iso
           SIZE="$(stat -c%s game.iso)"
           if [ "$SIZE" -le 50000000 ]; then
-            echo "::error::Download incompleto ou arquivo inválido: $SIZE bytes. Confirme que o Drive está como 'Qualquer pessoa com o link — Leitor'."
+            echo "::error::Download incompleto ou arquivo inválido: $SIZE bytes."
             exit 1
           fi
           file game.iso
