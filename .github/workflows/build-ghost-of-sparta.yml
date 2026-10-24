@@ -131,10 +131,12 @@ jobs:
           python3 SDL/build-scripts/create-android-project.py org.gow.shell stub.c --output "$RUNNER_TEMP/gow-android-project"
           APP="$RUNNER_TEMP/gow-android-project/org.gow.shell"
           cd "$APP"
-          # versionCode crescente: o Android so atualiza por cima se nao for menor
+          # Usa faixa alta para evitar INSTALL_FAILED_VERSION_DOWNGRADE ao instalar
+          # sobre builds anteriores deste projeto que já tenham versionCode maior.
+          RUN_VERSION_CODE=$((1000 + GITHUB_RUN_NUMBER))
           for f in app/build.gradle app/build.gradle.kts; do
             if [ -f "$f" ]; then
-              sed -i -E 's/versionCode([ =]+)[0-9]+/versionCode\1${{ github.run_number }}/' "$f"
+              sed -i -E "s/versionCode([ =]+)[0-9]+/versionCode\\1${RUN_VERSION_CODE}/" "$f"
               grep -n versionCode "$f" || true
             fi
           done
