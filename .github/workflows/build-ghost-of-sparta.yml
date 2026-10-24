@@ -1,5 +1,5 @@
 name: "Teste Android — Ghost of Sparta (isolado)"
-# Disparo de teste usando o link novo do Google Drive.
+# Disparo de teste usando o link novo do Google Drive em 2026-10-24.
 # Build manual e isolada de Ghost of Sparta; nunca reutiliza bibliotecas de Chains of Olympus.
 # ISO atualizada para o novo arquivo compartilhado pelo usuário.
 on:
