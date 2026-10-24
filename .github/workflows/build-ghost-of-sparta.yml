@@ -16,6 +16,7 @@ permissions:
 env:
   GAME_ID: UCUS98737
   SDL_COMMIT: fa2c02bb6e21974a89ea9824bc53c9932abe5f9c
+  ISO_DRIVE_ID: 1ANlgMsZynUC50EGMt0AwPloK93D9uK4j
 
 jobs:
   build:
@@ -39,49 +40,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m pip install --break-system-packages -q 'gdown>=6.1'
-          # Primeiro tenta o arquivo direto. Se o Drive bloquear por quota,
-          # lista os ISOs públicos da pasta informada e tenta cópias alternativas.
-          if python3 -m gdown '1M1VhAqqzADMsocLffJ8x2tD8-5PbdADS' -O game.iso; then
-            echo "Download direto concluído."
-          else
-            echo "::warning::Download direto falhou; tentando os arquivos ISO da pasta compartilhada."
-            rm -f game.iso
-            python3 -m gdown 'https://drive.google.com/drive/folders/14w9hEr93PW2K1fWxAlsZAFOfUi-CAIfF' --json --quiet > drive-folder.json
-            python3 - <<'PY' > iso_urls.txt
-          import json
-          with open("drive-folder.json", encoding="utf-8") as f:
-              entries = json.load(f)
-          candidates = [e for e in entries if str(e.get("path", "")).lower().endswith(".iso")]
-          # Preferir nomes que identifiquem Ghost of Sparta/UCUS98737.
-          candidates.sort(key=lambda e: 0 if any(k in str(e.get("path", "")).lower() for k in ("ghost", "ucus98737", "gos")) else 1)
-          for entry in candidates:
-              url = entry.get("url")
-              if url:
-                  print(url)
-          PY
-            if [ ! -s iso_urls.txt ]; then
-              echo "::error::A pasta não retornou arquivos ISO públicos. Verifique o compartilhamento da pasta e o nome do arquivo."
-              exit 1
-            fi
-            downloaded=0
-            while IFS= read -r URL; do
-              [ -n "$URL" ] || continue
-              rm -f game.iso
-              echo "Tentando um arquivo ISO listado na pasta..."
-              if python3 -m gdown "$URL" -O game.iso && [ -s game.iso ]; then
-                SIZE="$(stat -c%s game.iso)"
-                if [ "$SIZE" -gt 50000000 ]; then
-                  downloaded=1
-                  break
-                fi
-                echo "::warning::Arquivo baixado pequeno demais ($SIZE bytes); tentando o próximo."
-              fi
-            done < iso_urls.txt
-            if [ "$downloaded" -ne 1 ]; then
-              echo "::error::Nenhuma ISO da pasta pôde ser baixada com tamanho válido. O Drive pode estar aplicando limite de tráfego."
-              exit 1
-            fi
-          fi
+          python3 -m gdown "$ISO_DRIVE_ID" -O game.iso
           test -s game.iso
           SIZE="$(stat -c%s game.iso)"
           if [ "$SIZE" -le 50000000 ]; then
@@ -90,6 +49,7 @@ jobs:
           fi
           file game.iso
           echo "ISO baixada: $SIZE bytes"
+
       - name: Ferramentas do host (gow_disc)
         run: |
           cmake -S . -B build/cmake_tools -G Ninja -DCMAKE_BUILD_TYPE=Release -DGOW_TOOLS_ONLY=ON
@@ -132,7 +92,6 @@ jobs:
           mkdir -p stubs
           "$AR" rc stubs/libpthread.a
           "$AR" rc stubs/librt.a
-          # O SDL já foi baixado pelo checkout dedicado acima; não crie symlink nem marcador dentro dele.
           cmake -S . -B build/cmake_android -G Ninja \
             -DFETCHCONTENT_SOURCE_DIR_SDL3:PATH="$PWD/SDL" \
             -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
@@ -161,8 +120,6 @@ jobs:
           python3 SDL/build-scripts/create-android-project.py org.gow.shell stub.c --output "$RUNNER_TEMP/gow-android-project"
           APP="$RUNNER_TEMP/gow-android-project/org.gow.shell"
           cd "$APP"
-          # Usa faixa alta para evitar INSTALL_FAILED_VERSION_DOWNGRADE ao instalar
-          # sobre builds anteriores deste projeto que já tenham versionCode maior.
           RUN_VERSION_CODE=$((1000 + GITHUB_RUN_NUMBER))
           for f in app/build.gradle app/build.gradle.kts; do
             if [ -f "$f" ]; then
@@ -177,7 +134,6 @@ jobs:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
-          # Substitui a libmain de exemplo gerada pelo template SDL pela libmain real do jogo.
           mkdir -p "$RUNNER_TEMP/apk-overlay"
           cd "$RUNNER_TEMP/apk-overlay"
           unzip -q "$RUNNER_TEMP/gow-android-project/org.gow.shell/app/build/outputs/apk/debug/app-debug.apk"
