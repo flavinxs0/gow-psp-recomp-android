@@ -142,7 +142,10 @@ if(MSVC)
   target_compile_definitions(openh264_dec PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
   target_compile_options(openh264_dec PRIVATE -O2 -w)
-  target_link_libraries(openh264_dec PRIVATE pthread)
+  # Android's Bionic provides pthread symbols through libc; the NDK has no separate libpthread.
+  if(NOT ANDROID)
+    target_link_libraries(openh264_dec PRIVATE pthread)
+  endif()
 endif()
 
 # PGD decryption (Ghost of Sparta's encrypted data files, sceIoIoctl 0x04100001): PPSSPP's
