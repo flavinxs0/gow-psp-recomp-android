@@ -1,5 +1,6 @@
 name: "Teste Android — Ghost of Sparta (isolado)"
 # Build manual e isolada de Ghost of Sparta; nunca reutiliza bibliotecas de Chains of Olympus.
+# ISO atualizada para o novo arquivo compartilhado pelo usuário.
 on:
   workflow_dispatch:
   push:
