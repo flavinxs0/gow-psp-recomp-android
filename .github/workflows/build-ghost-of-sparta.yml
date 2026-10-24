@@ -132,7 +132,9 @@ jobs:
           APP="$RUNNER_TEMP/gow-android-project/org.gow.shell"
           # Bundle the real ARM64 game runtime libraries into the Android app before Gradle packages it.
           mkdir -p "$APP/app/src/main/jniLibs/arm64-v8a"
-          cp pack/lib/arm64-v8a/*.so "$APP/app/src/main/jniLibs/arm64-v8a/"
+          # SDL gera sua própria libSDL3.so via NDK; copiar a segunda versão causa conflito no merge.
+          cp pack/lib/arm64-v8a/libmain.so "$APP/app/src/main/jniLibs/arm64-v8a/"
+          cp pack/lib/arm64-v8a/libc++_shared.so "$APP/app/src/main/jniLibs/arm64-v8a/"
           echo "Bibliotecas nativas incluídas no projeto Android:"
           ls -lh "$APP/app/src/main/jniLibs/arm64-v8a/"
           cd "$APP"
@@ -151,7 +153,6 @@ jobs:
           KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           cp "$RUNNER_TEMP/gow-android-project/org.gow.shell/app/build/outputs/apk/debug/app-debug.apk" "$RUNNER_TEMP/unsigned.apk"
-          # TODO: wire the native game libraries into the SDL-generated Android project before release packaging.
           BUILD_TOOLS="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
           "$BUILD_TOOLS/zipalign" -f -p 4 "$RUNNER_TEMP/unsigned.apk" "$RUNNER_TEMP/aligned.apk"
           if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
