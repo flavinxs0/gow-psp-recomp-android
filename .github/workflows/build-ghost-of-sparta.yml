@@ -48,7 +48,7 @@ jobs:
           fi
           file game.iso
           echo "ISO baixada: $SIZE bytes"
-                - name: Ferramentas do host (gow_disc)
+      - name: Ferramentas do host (gow_disc)
         run: |
           cmake -S . -B build/cmake_tools -G Ninja -DCMAKE_BUILD_TYPE=Release -DGOW_TOOLS_ONLY=ON
           cmake --build build/cmake_tools --target gow_disc --parallel
