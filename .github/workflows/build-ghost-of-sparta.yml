@@ -35,67 +35,20 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Baixar o disco pelo Gofile
-        env:
-          GOW_GOS_GOFILE_URL: https://gofile.io/d/C7AwFhXl
+      - name: Baixar o disco pelo Google Drive
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import json, re, subprocess, sys, urllib.request
-          from urllib.error import HTTPError, URLError
-
-          share_url = "https://gofile.io/d/C7AwFhXl"
-          content_id = share_url.rstrip("/").split("/")[-1]
-          api_url = f"https://api.gofile.io/contents/{content_id}"
-          request = urllib.request.Request(api_url, headers={
-              "User-Agent": "Mozilla/5.0",
-              "Accept": "application/json",
-          })
-          try:
-              with urllib.request.urlopen(request, timeout=30) as response:
-                  payload = json.load(response)
-          except Exception as exc:
-              print(f"::error::Não foi possível consultar o Gofile: {exc}")
-              sys.exit(1)
-
-          if payload.get("status") != "ok":
-              print("::error::A API pública do Gofile não retornou acesso ao conteúdo.")
-              print(json.dumps(payload)[:1500])
-              sys.exit(1)
-
-          data = payload.get("data", {})
-          children = data.get("children", {})
-          files = []
-          if isinstance(children, dict):
-              files = [v for v in children.values() if isinstance(v, dict) and v.get("type") == "file"]
-          elif isinstance(children, list):
-              files = [v for v in children if isinstance(v, dict) and v.get("type") == "file"]
-          if data.get("type") == "file":
-              files = [data]
-
-          iso = next((f for f in files if str(f.get("name", "")).lower().endswith((".iso", ".cso"))), None)
-          if not iso:
-              print("::error::Não encontrei arquivo ISO/CSO no compartilhamento do Gofile.")
-              print("Arquivos visíveis:", [f.get("name") for f in files])
-              sys.exit(1)
-
-          link = iso.get("link")
-          if not link:
-              print("::error::O Gofile não forneceu um link de download para a ISO.")
-              sys.exit(1)
-
-          print(f"Arquivo encontrado: {iso.get('name')} ({iso.get('size', 0)} bytes)")
-          subprocess.run(["curl", "-fL", "--retry", "3", "--connect-timeout", "30",
-                          "--max-time", "1800", link, "-o", "game.iso"], check=True)
-          import os
-          size = os.path.getsize("game.iso")
-          if size <= 50_000_000:
-              print(f"::error::Download incompleto ou arquivo inválido: {size} bytes")
-              sys.exit(1)
-          print(f"ISO baixada: {size} bytes")
-          PY
-
-      - name: Ferramentas do host (gow_disc)
+          python3 -m pip install --break-system-packages -q gdown
+          python3 -m gdown --fuzzy 'https://drive.google.com/file/d/1_LZlT3USCtfyBGkAazSqOTIdw0KazyUq/view?usp=drive_link' -O game.iso
+          test -s game.iso
+          SIZE="$(stat -c%s game.iso)"
+          if [ "$SIZE" -le 50000000 ]; then
+            echo "::error::Download incompleto ou arquivo inválido: $SIZE bytes. Confirme que o Drive está como 'Qualquer pessoa com o link — Leitor'."
+            exit 1
+          fi
+          file game.iso
+          echo "ISO baixada: $SIZE bytes"
+                - name: Ferramentas do host (gow_disc)
         run: |
           cmake -S . -B build/cmake_tools -G Ninja -DCMAKE_BUILD_TYPE=Release -DGOW_TOOLS_ONLY=ON
           cmake --build build/cmake_tools --target gow_disc --parallel
