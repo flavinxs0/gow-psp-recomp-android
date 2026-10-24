@@ -129,8 +129,13 @@ jobs:
         run: |
           printf '#include <SDL3/SDL_main.h>\nint main(int argc, char **argv) { (void)argc; (void)argv; return 0; }\n' > stub.c
           python3 SDL/build-scripts/create-android-project.py org.gow.shell stub.c --output "$RUNNER_TEMP/gow-android-project"
-          # Launcher customizer is optional; this repository version does not ship that helper.
-          cd "$RUNNER_TEMP/gow-android-project/org.gow.shell"
+          APP="$RUNNER_TEMP/gow-android-project/org.gow.shell"
+          # Bundle the real ARM64 game runtime libraries into the Android app before Gradle packages it.
+          mkdir -p "$APP/app/src/main/jniLibs/arm64-v8a"
+          cp pack/lib/arm64-v8a/*.so "$APP/app/src/main/jniLibs/arm64-v8a/"
+          echo "Bibliotecas nativas incluídas no projeto Android:"
+          ls -lh "$APP/app/src/main/jniLibs/arm64-v8a/"
+          cd "$APP"
           # versionCode crescente: o Android so atualiza por cima se nao for menor
           for f in app/build.gradle app/build.gradle.kts; do
             if [ -f "$f" ]; then
