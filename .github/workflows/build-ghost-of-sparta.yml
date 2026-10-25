@@ -144,7 +144,10 @@ jobs:
           cp "$GITHUB_WORKSPACE/pack/lib/arm64-v8a/libc++_shared.so" lib/arm64-v8a/libc++_shared.so
           echo "Bibliotecas ARM64 finais no APK:"
           ls -lh lib/arm64-v8a/
-          zip -qr "$RUNNER_TEMP/unsigned.apk" .
+          # Android 11+ exige resources.arsc sem compressão e alinhado.
+          # Cria o APK com esse recurso armazenado (ZIP method 0), depois inclui os demais arquivos.
+          zip -q -0 "$RUNNER_TEMP/unsigned.apk" resources.arsc
+          zip -qr "$RUNNER_TEMP/unsigned.apk" . -x resources.arsc
           BUILD_TOOLS="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
           "$BUILD_TOOLS/zipalign" -f -p 4 "$RUNNER_TEMP/unsigned.apk" "$RUNNER_TEMP/aligned.apk"
           if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
