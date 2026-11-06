@@ -165,9 +165,9 @@ jobs:
             "$RUNNER_TEMP/gow-dual-project/org.gow.shell/app/build/outputs/apk/debug/app-debug.apk" \
             "$RUNNER_TEMP/UCUS98653-source.apk" \
             "$RUNNER_TEMP/UCUS98737-source.apk" \
-            "$RUNNER_TEMP/GodOfWar-PSP-Dual-unsigned.apk"
+            "$RUNNER_TEMP/GOW-Port-PSP-unsigned.apk"
           BUILD_TOOLS="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
-          "$BUILD_TOOLS/zipalign" -f -p 4 "$RUNNER_TEMP/GodOfWar-PSP-Dual-unsigned.apk" "$RUNNER_TEMP/GodOfWar-PSP-Dual-aligned.apk"
+          "$BUILD_TOOLS/zipalign" -f -p 4 "$RUNNER_TEMP/GOW-Port-PSP-unsigned.apk" "$RUNNER_TEMP/GOW-Port-PSP-aligned.apk"
           if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
             echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/gow.keystore"
             KS="$RUNNER_TEMP/gow.keystore"; ALIAS=gow; export SIGN_PASS="$KS_PASS"
@@ -180,15 +180,15 @@ jobs:
           fi
           "$BUILD_TOOLS/apksigner" sign --ks "$KS" --ks-key-alias "$ALIAS" \
             --ks-pass env:SIGN_PASS --key-pass env:SIGN_PASS \
-            --out "$RUNNER_TEMP/GodOfWar-PSP-Recomp-Dual.apk" "$RUNNER_TEMP/GodOfWar-PSP-Dual-aligned.apk"
-          "$BUILD_TOOLS/apksigner" verify --verbose "$RUNNER_TEMP/GodOfWar-PSP-Recomp-Dual.apk"
-          unzip -l "$RUNNER_TEMP/GodOfWar-PSP-Recomp-Dual.apk" | grep -E 'libmain_(coo|gos)\.so|libSDL3\.so|libc\+\+_shared\.so'
-          unzip -l "$RUNNER_TEMP/GodOfWar-PSP-Recomp-Dual.apk" | grep -q 'lib/arm64-v8a/libmain_coo.so'
-          unzip -l "$RUNNER_TEMP/GodOfWar-PSP-Recomp-Dual.apk" | grep -q 'lib/arm64-v8a/libmain_gos.so'
+            --out "$RUNNER_TEMP/GOW Port PSP.apk" "$RUNNER_TEMP/GOW-Port-PSP-aligned.apk"
+          "$BUILD_TOOLS/apksigner" verify --verbose "$RUNNER_TEMP/GOW Port PSP.apk"
+          unzip -l "$RUNNER_TEMP/GOW Port PSP.apk" | grep -E 'libmain_(coo|gos)\.so|libSDL3\.so|libc\+\+_shared\.so'
+          unzip -l "$RUNNER_TEMP/GOW Port PSP.apk" | grep -q 'lib/arm64-v8a/libmain_coo.so'
+          unzip -l "$RUNNER_TEMP/GOW Port PSP.apk" | grep -q 'lib/arm64-v8a/libmain_gos.so'
 
       - uses: actions/upload-artifact@v4
         with:
-          name: GodOfWar-PSP-Dual-apk-${{ github.run_number }}
-          path: ${{ runner.temp }}/GodOfWar-PSP-Recomp-Dual.apk
+          name: GOW-Port-PSP-apk-${{ github.run_number }}
+          path: ${{ runner.temp }}/GOW Port PSP.apk
           if-no-files-found: error
           retention-days: 3
