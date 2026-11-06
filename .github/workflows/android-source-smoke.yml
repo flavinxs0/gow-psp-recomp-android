@@ -38,6 +38,11 @@ jobs:
           ref: ${{ env.SDL_COMMIT }}
           path: SDL
 
+      - name: Assert requested runtime safeguards are present
+        run: |
+          grep -Fq 'rt_display_set_hz(on ? 59.94 : g_gameplay_hz)' runtime/rt_host.c
+          grep -Fq 'getWindow().getDecorView().post(this::enterImmersiveMode)' android/launcher/src/main/java/org/gow/shell/GameActivity.java
+
       - name: Create harmless generated-source stub
         run: |
           mkdir -p build/gen/UCUS98653_full
