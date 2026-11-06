@@ -475,7 +475,7 @@ void rt_host_movie_playing(int on) {
         /* The gameplay limiter must not slow the PSP's movie decoder or ATRAC stream.
          * Restore the chosen gameplay rate only after the movie ends or is skipped. */
         rt_display_set_hz(on ? 59.94 : g_gameplay_hz);
-        printf("[host] movie timing %.2f Hz; gameplay target %.2f Hz\\n",
+        printf("[host] movie timing %.2f Hz; gameplay target %.2f Hz\n",
                rt_display_hz(), g_gameplay_hz);
     }
     g_movie_on = on;
