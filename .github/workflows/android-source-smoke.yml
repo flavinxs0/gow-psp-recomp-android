@@ -33,15 +33,15 @@ jobs:
       - name: Create harmless generated-source stub
         run: |
           mkdir -p build/gen/UCUS98653_full
-          printf 'int gow_smoke_generated_source(void) { return 0; }\\n' > build/gen/UCUS98653_full/smoke_stub.c
+          printf 'int gow_smoke_generated_source(void) { return 0; }\n' > build/gen/UCUS98653_full/smoke_stub.c
 
       - name: Build SDL3 for Android ARM64
         run: |
           NDK="$ANDROID_NDK_LATEST_HOME"
-          cmake -S SDL -B build-sdl -G Ninja \\
-            -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \\
-            -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-24 \\
-            -DCMAKE_BUILD_TYPE=Release -DSDL_SHARED=ON -DSDL_STATIC=OFF \\
+          cmake -S SDL -B build-sdl -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-24 \
+            -DCMAKE_BUILD_TYPE=Release -DSDL_SHARED=ON -DSDL_STATIC=OFF \
             -DSDL_TESTS=OFF -DSDL_EXAMPLES=OFF
           cmake --build build-sdl --parallel
           test -s build-sdl/libSDL3.so
@@ -55,12 +55,12 @@ jobs:
           "$AR" rc stubs/librt.a
           ln -sfn "$PWD/SDL" "build/deps/SDL3-${SDL_COMMIT}"
           touch "build/deps/SDL3-${SDL_COMMIT}/.gow_complete"
-          cmake -S . -B build/cmake_smoke -G Ninja \\
-            -DFETCHCONTENT_SOURCE_DIR_SDL3="$PWD/SDL" \\
-            -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \\
-            -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-24 -DANDROID_STL=c++_shared \\
-            -DCMAKE_BUILD_TYPE=Release -DGAME=UCUS98653_full -DGOW_ANDROID=ON \\
-            -DGOW_SDL_SO="$PWD/build-sdl/libSDL3.so" \\
+          cmake -S . -B build/cmake_smoke -G Ninja \
+            -DFETCHCONTENT_SOURCE_DIR_SDL3="$PWD/SDL" \
+            -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-24 -DANDROID_STL=c++_shared \
+            -DCMAKE_BUILD_TYPE=Release -DGAME=UCUS98653_full -DGOW_ANDROID=ON \
+            -DGOW_SDL_SO="$PWD/build-sdl/libSDL3.so" \
             -DCMAKE_SHARED_LINKER_FLAGS="-L$PWD/stubs"
           cmake --build build/cmake_smoke --parallel
           MAIN="$(find build/cmake_smoke -name libmain.so -type f -print -quit)"
@@ -86,7 +86,7 @@ jobs:
 
       - name: Generate disposable SDL Android project
         run: |
-          printf '#include <SDL3/SDL_main.h>\\nint main(int argc, char **argv) { (void)argc; (void)argv; return 0; }\\n' > stub.c
+          printf '#include <SDL3/SDL_main.h>\nint main(int argc, char **argv) { (void)argc; (void)argv; return 0; }\n' > stub.c
           python3 SDL/build-scripts/create-android-project.py org.gow.shell stub.c --output "$RUNNER_TEMP/gow-android-project"
           python3 tools/install_android_launcher.py "$RUNNER_TEMP/gow-android-project/org.gow.shell"
 
