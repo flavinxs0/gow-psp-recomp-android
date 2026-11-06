@@ -46,7 +46,18 @@ jobs:
       - name: Create harmless generated-source stub
         run: |
           mkdir -p build/gen/UCUS98653_full
-          printf 'int gow_smoke_generated_source(void) { return 0; }\n' > build/gen/UCUS98653_full/smoke_stub.c
+          cat > build/gen/UCUS98653_full/smoke_stub.c <<'EOF'
+          #include "psp_rt.h"
+          const RtFuncEntry rt_funcs[] = {{0, 0}};
+          const size_t rt_funcs_count = 0;
+          const char *const RT_GAME_ID = "SMOKE";
+          const char *const RT_MODULE_NAME = "smoke";
+          const uint32_t RT_IMAGE_BASE = 0x08800000u;
+          const uint32_t RT_IMAGE_SIZE = 0x1000u;
+          const uint32_t RT_ENTRY = 0x08800000u;
+          const uint32_t RT_GP = 0;
+          int gow_smoke_generated_source(void) { return 0; }
+          EOF
 
       - name: Build SDL3 for Android ARM64
         run: |
