@@ -39,6 +39,11 @@ def main() -> int:
 
     libraries = {COO_LIB: coo_main, GOS_LIB: gos_main, SDL_LIB: sdl, CPP_LIB: cpp}
     with zipfile.ZipFile(built, "r") as base:
+        bundled_game_files = [name for name in base.namelist()
+                              if name.startswith("assets/gow-games/") or name.endswith("/image.bin")]
+        if bundled_game_files:
+            print("Refusing to package game-specific files in the APK: " + ", ".join(bundled_game_files), file=sys.stderr)
+            return 1
         with zipfile.ZipFile(output, "w") as out:
             out.comment = base.comment
             seen = set()
@@ -71,7 +76,7 @@ def main() -> int:
             print("Output APK has no AndroidManifest.xml.", file=sys.stderr)
             return 1
     print(f"Packaged dual-game launcher from {coo.name} and {gos.name}: {output}")
-    print("Included native runtimes: libmain_coo.so and libmain_gos.so. Next: zipalign, sign, and test both titles.")
+    print("Included native runtimes only; game-specific image.bin files must be imported by the user.")
     return 0
 
 
