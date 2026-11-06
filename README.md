@@ -2,9 +2,9 @@
 
 **🇧🇷 Português | 🇺🇸 English**
 
-Projeto comunitário independente para Android ARM64 que reúne as recompilações nativas de **God of War: Chains of Olympus** e **God of War: Ghost of Sparta** em um único aplicativo. O launcher permite selecionar qual jogo iniciar e mantém os dados de cada título separados. O APK não inclui arquivos específicos dos jogos.
+Projeto comunitário independente para Android ARM64 que reúne as recompilações nativas de **God of War: Chains of Olympus** e **God of War: Ghost of Sparta** em um único aplicativo. O launcher permite selecionar qual jogo iniciar e mantém os dados de cada título separados.
 
-Independent community Android ARM64 project combining the native recompilations of **God of War: Chains of Olympus** and **God of War: Ghost of Sparta** in one app. The launcher lets players choose a game and keeps each title's data separate. The APK does not include game-specific files.
+Independent community Android ARM64 project combining the native recompilations of **God of War: Chains of Olympus** and **God of War: Ghost of Sparta** in one app. The launcher lets players choose a game and keeps each title's data separate.
 
 > **Aviso legal / Legal notice:** projeto de fãs, sem afiliação ou aprovação da Sony Interactive Entertainment ou da Santa Monica Studio. God of War é uma marca de seu titular. O usuário deve fornecer suas próprias cópias dos jogos, obtidas legalmente. Este repositório e os APKs de lançamento não devem distribuir ISOs, dumps ou outros arquivos protegidos dos jogos.
 >
@@ -21,7 +21,7 @@ Independent community Android ARM64 project combining the native recompilations 
 | God of War: Chains of Olympus | `UCUS98653` | Integrado ao APK Dual |
 | God of War: Ghost of Sparta | `UCUS98737` | Integrado ao APK Dual |
 
-**Os dois jogos já foram iniciados e testados pelo usuário no mesmo aplicativo.** Isso confirma a integração funcional no aparelho usado no teste; compatibilidade e desempenho em outros dispositivos ainda podem variar. O APK não deve conter `image.bin`, ISOs ou dumps; cada usuário importa seus próprios arquivos.
+**Os dois jogos já foram iniciados e testados pelo usuário no mesmo aplicativo.** Isso confirma a integração funcional no aparelho usado no teste; compatibilidade e desempenho em outros dispositivos ainda podem variar.
 
 ### Recursos
 
@@ -39,10 +39,10 @@ Independent community Android ARM64 project combining the native recompilations 
 1. Abra [Releases / Lançamentos](https://github.com/flavinxs0/gow-psp-recomp-android/releases).
 2. Baixe o APK Dual anexado à versão desejada.
 3. Instale o APK no Android.
-4. No launcher, selecione o jogo e importe os arquivos da sua própria cópia legal: `game.iso` e `image.bin`.
+4. No launcher, selecione o jogo e importe a sua própria ISO legal quando solicitado.
 5. Mantenha espaço livre suficiente para os arquivos dos jogos e dados gerados.
 
-O aplicativo mantém os arquivos de cada jogo separados usando os IDs `UCUS98653` e `UCUS98737`. Em **Instalar arquivos do jogo**, importe os dois arquivos correspondentes ao título selecionado. O APK e o repositório não devem distribuir esses arquivos.
+O aplicativo mantém os arquivos de cada jogo separados usando os IDs `UCUS98653` e `UCUS98737`. Não é necessário colocar ISOs ou dumps no repositório.
 
 ### Atualizações
 
@@ -65,7 +65,7 @@ Abra uma [Issue](https://github.com/flavinxs0/gow-psp-recomp-android/issues) com
 | God of War: Chains of Olympus | `UCUS98653` | Integrated into the Dual APK |
 | God of War: Ghost of Sparta | `UCUS98737` | Integrated into the Dual APK |
 
-**The user has launched and tested both games in the same app.** This confirms the integration on the tested device; compatibility and performance may vary on other devices. The APK must not contain `image.bin`, disc images, or dumps; each player imports their own files.
+**The user has launched and tested both games in the same app.** This confirms the integration on the tested device; compatibility and performance may vary on other devices.
 
 ### Features
 
@@ -83,10 +83,10 @@ Abra uma [Issue](https://github.com/flavinxs0/gow-psp-recomp-android/issues) com
 1. Open [Releases](https://github.com/flavinxs0/gow-psp-recomp-android/releases).
 2. Download the Dual APK attached to the desired release.
 3. Install it on Android.
-4. Select a game in the launcher and import the files from your own legal copy: `game.iso` and `image.bin`.
+4. Select a game in the launcher and import your own legally obtained ISO when requested.
 5. Keep enough free storage for game files and generated data.
 
-The app keeps each game's files separate using IDs `UCUS98653` and `UCUS98737`. Use **Install game files** to import both files for the selected title. The APK and repository must not distribute those files.
+The app keeps each game's files separate using IDs `UCUS98653` and `UCUS98737`. Do not upload disc images or dumps to this repository.
 
 ### Updates and bug reports
 
