@@ -43,6 +43,7 @@ typedef struct {
     uint64_t end;          /* frame position where this channel's queued data ends */
     uint64_t blocks;
     uint64_t gaps, gap_frames;  /* the channel ran dry between two blocks for a moment (a click): diagnostics */
+    uint64_t first_gap_us, last_gap_us, max_gap_frames;
 } AudioCh;
 
 static AudioCh g_ch[NCH];
@@ -206,6 +207,10 @@ void rt_audio_report(void) {
     for (int i = 0; i < NCH; i++)
         if (g_ch[i].blocks) printf(" %s%d=%llu (%.1f ms)", i == CH_OUT2 ? "out2/" : "", i, (unsigned long long)g_ch[i].gaps, g_ch[i].gap_frames * 1000.0 / 44100);
     printf("\n");
+    printf("\\n  dropout timing:");
+    for (int i = 0; i < NCH; i++) if (g_ch[i].gaps)
+        printf(" %s%d[first=%.3f s last=%.3f s max=%.2f ms]", i == CH_OUT2 ? "out2/" : "", i,
+               g_ch[i].first_gap_us / 1e6, g_ch[i].last_gap_us / 1e6, g_ch[i].max_gap_frames * 1000.0 / 44100);
 }
 
 /* --- channels ------------------------------------------------------------------------ */
@@ -215,7 +220,14 @@ static uint64_t ch_queue(AudioCh *ch, uint32_t addr) {
     rt_audio_advance(k_now);
     uint64_t start = ch->end > now ? ch->end : now;
     uint32_t n = ch->samples;
-    if (ch->end && now > ch->end && now - ch->end < 11025) { ch->gaps++; ch->gap_frames += now - ch->end; }  /* < 250 ms: a dropout, not a pause */
+    if (ch->end && now > ch->end && now - ch->end < 11025) {  /* < 250 ms: a dropout, not a pause */
+        uint64_t gap = now - ch->end;
+        ch->gaps++;
+        ch->gap_frames += gap;
+        if (!ch->first_gap_us) ch->first_gap_us = k_now;
+        ch->last_gap_us = k_now;
+        if (gap > ch->max_gap_frames) ch->max_gap_frames = gap;
+    }
     if (addr && n) {
         int mono = ch->format == FMT_MONO;
         int64_t lv = ch->lvol, rv = ch->rvol;  /* 0x8000 = unity; Output2 allows up to 0xFFFFF */
