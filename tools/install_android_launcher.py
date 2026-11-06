@@ -153,12 +153,12 @@ def main() -> int:
         shutil.copy2(source_dir / name, java_dir / name)
 
     generated_activity.set(ANDROID + "name", "GameActivity")
-    generated_activity.set(ANDROID + "label", "God of War PSP Recomp")
+    generated_activity.set(ANDROID + "label", "GOW Port PSP")
     generated_activity.set(ANDROID + "icon", "@mipmap/ic_launcher")  # gow_icon_v1
     generated_activity.set(ANDROID + "exported", "true" if has_usb_attach else "false")
     # Do not overwrite launchMode/configChanges/other SDL-generated attributes.
 
-    app.set(ANDROID + "label", "God of War PSP Recomp")
+    app.set(ANDROID + "label", "GOW Port PSP")
     app.set(ANDROID + "icon", "@mipmap/ic_launcher")  # gow_icon_v1
 
     if launcher is None:
@@ -169,7 +169,7 @@ def main() -> int:
         if is_launcher_filter(intent):
             launcher.remove(intent)
     launcher.set(ANDROID + "name", "LauncherActivity")
-    launcher.set(ANDROID + "label", "God of War PSP Recomp")
+    launcher.set(ANDROID + "label", "GOW Port PSP")
     launcher.set(ANDROID + "icon", "@mipmap/ic_launcher")  # gow_icon_v1
     launcher.set(ANDROID + "exported", "true")
     launcher.set(ANDROID + "configChanges", "orientation|screenSize|keyboardHidden")
