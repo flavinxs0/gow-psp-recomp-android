@@ -207,10 +207,11 @@ void rt_audio_report(void) {
     for (int i = 0; i < NCH; i++)
         if (g_ch[i].blocks) printf(" %s%d=%llu (%.1f ms)", i == CH_OUT2 ? "out2/" : "", i, (unsigned long long)g_ch[i].gaps, g_ch[i].gap_frames * 1000.0 / 44100);
     printf("\n");
-    printf("\\n  dropout timing:");
+    printf("\n  dropout timing:");
     for (int i = 0; i < NCH; i++) if (g_ch[i].gaps)
         printf(" %s%d[first=%.3f s last=%.3f s max=%.2f ms]", i == CH_OUT2 ? "out2/" : "", i,
                g_ch[i].first_gap_us / 1e6, g_ch[i].last_gap_us / 1e6, g_ch[i].max_gap_frames * 1000.0 / 44100);
+    printf("\n");
 }
 
 /* --- channels ------------------------------------------------------------------------ */
