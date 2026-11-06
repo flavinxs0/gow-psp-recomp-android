@@ -246,12 +246,16 @@ static int rec_open(const char *path) {
     return 1;
 }
 
-/* the display refresh: --fps, else the one a recording was played at */
+/* The selected FPS is the gameplay refresh. PSP movies are timed against the
+ * original 59.94 Hz vblank and temporarily switch back to it in rt_host_movie_playing. */
+static double g_gameplay_hz = 59.94;
+
 static void setup_refresh(void) {
     double hz = rt_gpu_opt.fps > 0 ? rt_gpu_opt.fps : g_script_fps;
-    if (hz <= 0) return;
-    rt_display_set_hz(hz);
-    printf("[host] display refresh %.3f Hz (vblank every %.0f us)\n", rt_display_hz(), 1e6 / rt_display_hz());
+    if (hz > 0) g_gameplay_hz = hz;
+    rt_display_set_hz(g_gameplay_hz);
+    printf("[host] gameplay refresh %.3f Hz (vblank every %.0f us)\n",
+           rt_display_hz(), 1e6 / rt_display_hz());
 }
 
 int rt_host_wants_idle(void) { return g_nskips > 0; }
@@ -466,7 +470,14 @@ static void screenshot(void) {
 }
 
 void rt_host_movie_playing(int on) {
-    if (on != g_movie_on) g_skip_req = 0;
+    if (on != g_movie_on) {
+        g_skip_req = 0;
+        /* The gameplay limiter must not slow the PSP's movie decoder or ATRAC stream.
+         * Restore the chosen gameplay rate only after the movie ends or is skipped. */
+        rt_display_set_hz(on ? 59.94 : g_gameplay_hz);
+        printf("[host] movie timing %.2f Hz; gameplay target %.2f Hz\\n",
+               rt_display_hz(), g_gameplay_hz);
+    }
     g_movie_on = on;
 }
 
