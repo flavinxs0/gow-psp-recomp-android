@@ -98,7 +98,6 @@ public final class LauncherActivity extends Activity {
             getWindow().setNavigationBarColor(BG);
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
             pad = dp(20);
-            installBundledImages();
             String savedScreenMode = prefs().getString("screen_mode", "16:9");
             if ("FULLSCREEN".equals(savedScreenMode)) {
                 // Migrate the old stretched mode to aspect-correct widescreen.
@@ -296,8 +295,6 @@ public final class LauncherActivity extends Activity {
             case "Arquivos do jogo": return "Game files";
             case "Importar ou substituir game.iso e image.bin": return "Import or replace game.iso and image.bin";
             case "Importar somente a ISO; image.bin vem no APK": return "Import only the ISO; image.bin is included in the APK";
-            case "image.bin — incluído no APK e instalado automaticamente": return "image.bin — included in APK and installed automatically";
-            case "Para jogar, importe somente a ISO do jogo escolhido. O image.bin correto já vem no APK.": return "To play, import only the ISO for the selected game. The matching image.bin is included in the APK.";
             case "Gerenciar": return "Manage";
             case "Volta todas as configurações ao original": return "Reset all settings to defaults";
             case "Português": return "Portuguese";
@@ -425,6 +422,7 @@ public final class LauncherActivity extends Activity {
             case "Tentar jogar": return "Try to play";
             case "Selecionar game.iso": return "Select game.iso";
             case "Selecionar image.bin": return "Select image.bin";
+            case "Selecionar image.bin": return "Select image.bin";
             case "OK": return "OK";
             case "Abrir release": return "Open release";
             case "Abrir releases": return "Open releases";
@@ -484,6 +482,7 @@ public final class LauncherActivity extends Activity {
             case "Pronto (%.1f GB)": return "Ready (%.1f GB)";
             case "Pronto (%.1f MB)": return "Ready (%.1f MB)";
             case "image.bin: ": return "image.bin: ";
+            case "Importe os dois arquivos correspondentes ao jogo selecionado. O app não inclui arquivos protegidos dos jogos.": return "Import both files matching the selected game. The app does not include copyrighted game files.";
             case "Selecione ": return "Select ";
             case "(vazio)": return "(empty)";
 
@@ -876,40 +875,6 @@ public final class LauncherActivity extends Activity {
         refreshStatus();
     }
 
-    /** Instala o image.bin correspondente à compilação de cada jogo. */
-    private void installBundledImages() {
-        String[] ids = { "UCUS98653", "UCUS98737" };
-        for (String id : ids) {
-            String asset = "gow-games/" + id + "/image.bin";
-            File dir = new File(new File(getExternalFilesDir(null), "gow-games"), id);
-            File target = new File(dir, "image.bin");
-            File temp = new File(dir, "image.bin.bundled.tmp");
-            try (InputStream probe = getAssets().open(asset)) {
-                long expectedSize = probe.available();
-                if (target.isFile() && target.length() == expectedSize) continue;
-                if (!dir.isDirectory() && !dir.mkdirs()) throw new java.io.IOException("Cannot create " + dir);
-                try (InputStream in = getAssets().open(asset); FileOutputStream out = new FileOutputStream(temp)) {
-                    byte[] buffer = new byte[64 * 1024];
-                    int count;
-                    while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
-                    out.getFD().sync();
-                }
-                if (temp.length() != expectedSize) throw new java.io.IOException("Bundled image.bin size mismatch for " + id);
-                File backup = new File(dir, "image.bin.previous");
-                if (target.exists() && !target.renameTo(backup)) throw new java.io.IOException("Cannot back up old image.bin for " + id);
-                if (!temp.renameTo(target)) {
-                    if (backup.exists()) backup.renameTo(target);
-                    throw new java.io.IOException("Cannot install bundled image.bin for " + id);
-                }
-                if (backup.exists()) backup.delete();
-                android.util.Log.i("GOW_ASSETS", "Installed matching image.bin for " + id + " (" + expectedSize + " bytes)");
-            } catch (Exception error) {
-                if (temp.exists()) temp.delete();
-                android.util.Log.e("GOW_ASSETS", "Could not install bundled image.bin for " + id, error);
-            }
-        }
-    }
-
     private void refreshStatus() {
         File image = new File(gameDir(), "image.bin");
         File iso = new File(gameDir(), "game.iso");
@@ -964,9 +929,10 @@ public final class LauncherActivity extends Activity {
                 ? String.format(Locale.US, localized("Pronto (%.1f MB)"), image.length() / 1048576.0) : localized("Pendente");
         dialog().setTitle(localized("Instalar arquivos do jogo"))
                 .setMessage(localized("game.iso — ") + isoState + "\n"
-                        + localized("image.bin — incluído no APK e instalado automaticamente")
-                        + "\n\n" + localized("Para jogar, importe somente a ISO do jogo escolhido. O image.bin correto já vem no APK."))
+                        + localized("image.bin — ") + imageState
+                        + "\n\n" + localized("Importe os dois arquivos correspondentes ao jogo selecionado. O app não inclui arquivos protegidos dos jogos."))
                 .setPositiveButton(localized("Selecionar game.iso"), (d, w) -> pickGameFile(PICK_GAME_ISO, "game.iso"))
+                .setNeutralButton(localized("Selecionar image.bin"), (d, w) -> pickGameFile(PICK_IMAGE_BIN, "image.bin"))
                 .setNegativeButton(localized("Fechar"), null)
                 .show();
     }
