@@ -225,7 +225,7 @@ static uint64_t ch_queue(AudioCh *ch, uint32_t addr) {
         uint64_t gap = now - ch->end;
         ch->gaps++;
         ch->gap_frames += gap;
-        if (!ch->first_gap_us) ch->first_gap_us = k_now;
+        if (ch->gaps == 1) ch->first_gap_us = k_now;
         ch->last_gap_us = k_now;
         if (gap > ch->max_gap_frames) ch->max_gap_frames = gap;
     }
