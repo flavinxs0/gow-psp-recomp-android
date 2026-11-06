@@ -136,6 +136,10 @@ public final class GameActivity extends SDLActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // SDL can recreate or resize its surface while the activity resumes; re-apply
+        // immersive mode after that transition so gameplay keeps the full display area.
+        enterImmersiveMode();
+        getWindow().getDecorView().post(this::enterImmersiveMode);
         hudHandler.removeCallbacks(hudUpdater);
         if (performanceHud != null) hudHandler.post(hudUpdater);
     }
