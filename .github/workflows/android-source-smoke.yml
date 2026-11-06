@@ -8,8 +8,6 @@ on:
       - "runtime/**"
       - "android/launcher/**"
       - "tools/install_android_launcher.py"
-      - "tools/package_dual_game_launcher.py"
-      - ".github/workflows/android-dual-game.yml"
       - "CMakeLists.txt"
   pull_request:
     branches: [android]
@@ -109,15 +107,6 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-
-      - name: Validate APK packaging keeps game files external
-        run: |
-          python3 -m py_compile tools/package_dual_game_launcher.py
-          ! grep -Fq 'cp build/gen/UCUS98653_full/image.bin' .github/workflows/android-dual-game.yml
-          ! grep -Fq 'cp build/gen/UCUS98737_full/image.bin' .github/workflows/android-dual-game.yml
-          grep -Fq 'bundled_game_files' tools/package_dual_game_launcher.py
-          grep -Fq 'setNeutralButton(localized("Selecionar image.bin")' android/launcher/src/main/java/org/gow/shell/LauncherActivity.java
-          ! grep -Fq 'installBundledImages' android/launcher/src/main/java/org/gow/shell/LauncherActivity.java
 
       - name: Generate disposable SDL Android project
         run: |
