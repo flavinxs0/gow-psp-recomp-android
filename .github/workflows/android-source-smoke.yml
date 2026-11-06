@@ -9,6 +9,14 @@ on:
       - "android/launcher/**"
       - "tools/install_android_launcher.py"
       - "CMakeLists.txt"
+  pull_request:
+    branches: [android]
+    paths:
+      - ".github/workflows/android-source-smoke.yml"
+      - "runtime/**"
+      - "android/launcher/**"
+      - "tools/install_android_launcher.py"
+      - "CMakeLists.txt"
 
 permissions:
   contents: read
