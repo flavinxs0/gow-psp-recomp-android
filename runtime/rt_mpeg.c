@@ -108,6 +108,17 @@ typedef struct Mpeg {
 static Mpeg g_mpeg;
 static uint32_t g_stream_id = 1;
 static uint64_t g_total_video, g_total_audio, g_total_errors, g_movies;
+static unsigned g_skip_put_logs, g_skip_avc_au_logs, g_skip_atrac_au_logs, g_skip_avc_decode_logs;
+
+static void log_skip_ring(const Mpeg *m, const char *stage) {
+    if (!m->rb) {
+        rt_log("[mpeg] skip %s: no ringbuffer; put=%u taken=%u\n", stage, m->put, m->taken);
+        return;
+    }
+    rt_log("[mpeg] skip %s: put=%u taken=%u avail=%u read=%u write=%u packets=%u\n",
+           stage, m->put, m->taken, rt_r32(m->rb + RB_AVAIL), rt_r32(m->rb + RB_READ),
+           rt_r32(m->rb + RB_WRITEPOS), rt_r32(m->rb + RB_PACKETS));
+}
 
 static void delay_us(uint64_t us) { k_wait(WT_DELAY, 0, us); }
 
@@ -587,6 +598,9 @@ static void hle_MpegRingbufferPut(RtCtx *c) {
     if (n <= 0 || packets <= 0) RET(0);
     Mpeg *m = ctx_of(rt_r32(rb + RB_MPEG));
     uint32_t cb = rt_r32(rb + RB_CALLBACK), arg = rt_r32(rb + RB_CBARG), data = rt_r32(rb + RB_DATA);
+    if (m && m->skipped && g_skip_put_logs++ < 8)
+        rt_log("[mpeg] post-skip ringbuffer put: request=%d avail=%d read=%u write=%u\n",
+               n, avail, rt_r32(rb + RB_READ), rt_r32(rb + RB_WRITEPOS));
     if (!cb) RET(0);
     int32_t total = 0, first_err = 0;
     int32_t write = (int32_t)rt_r32(rb + RB_WRITEPOS) % packets;
@@ -623,7 +637,9 @@ static void check_skip(Mpeg *m) {
     m->have_vau = m->have_aau = 0;
     rt_host_movie_playing(0);
     rt_log("[mpeg] movie skipped after %u pictures\n", m->video_frames);
+    log_skip_ring(m, "before drain");
     if (m->next_packet == ring_packet) while (ring_packet(m)) {}
+    log_skip_ring(m, "after drain");
 }
 
 /* (mpeg, streamId, au, attr) */
@@ -635,6 +651,8 @@ static void hle_MpegGetAvcAu(RtCtx *c) {
     if (!m->have_vau && !next_video_au(m)) {
         /* the ring holds no complete AU yet, or the movie is over */
         write_au(A2, NO_TS, NO_TS, rt_r32(A2 + 16), rt_r32(A2 + 20));
+        if (m->skipped && g_skip_avc_au_logs++ < 8)
+            rt_log("[mpeg] post-skip AVC AU returned no data; frames=%u/%u\n", m->video_frames, m->audio_frames);
         if (stream_done(m)) log_end(m);
         delay_us(DELAY_GET_AU);
         RET(ERR_NO_DATA);
@@ -649,7 +667,11 @@ static void hle_MpegGetAtracAu(RtCtx *c) {
     Mpeg *m = ctx_of(A0);
     if (!m) RET(-1);
     check_skip(m);
-    if (!m->have_aau && !next_audio_au(m)) { delay_us(DELAY_GET_AU); RET(ERR_NO_DATA); }
+    if (!m->have_aau && !next_audio_au(m)) {
+        if (m->skipped && g_skip_atrac_au_logs++ < 8)
+            rt_log("[mpeg] post-skip ATRAC AU returned no data; frames=%u/%u\n", m->video_frames, m->audio_frames);
+        delay_us(DELAY_GET_AU); RET(ERR_NO_DATA);
+    }
     write_au(A2, m->aau_pts, NO_TS, rt_r32(A2 + 16), (uint32_t)m->aau.len);
     if (A3) rt_w32(A3, 0);
     delay_us(DELAY_GET_AU);
@@ -664,6 +686,8 @@ static void hle_MpegAvcDecode(RtCtx *c) {
     uint32_t fw = A2 ? A2 : m->frame_width ? m->frame_width : (uint32_t)m->width, init = T0;
     uint32_t buffer = rt_r32(A3);
     if (!m->have_vau && !next_video_au(m)) {
+        if (m->skipped && g_skip_avc_decode_logs++ < 8)
+            rt_log("[mpeg] post-skip AVC decode empty; frames=%u/%u\n", m->video_frames, m->audio_frames);
         if (init) rt_w32(init, 0);
         if (stream_done(m)) { delay_us(DELAY_AVC_EMPTY); RET(ERR_AVC_DECODE_FATAL); }
         delay_us(DELAY_AVC_DECODE);
