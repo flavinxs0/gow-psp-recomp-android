@@ -565,7 +565,7 @@ static void pump(void) {
     int ask = 0;
     while (SDL_PollEvent(&e)) {
         switch (e.type) {
-        case SDL_EVENT_QUIT: g_quit = 1; break;  /* the close button, and Alt+F4 */
+        case SDL_EVENT_QUIT: printf("[host] SDL_EVENT_QUIT received\n"); g_quit = 1; break;  /* the close button, and Alt+F4 */
         case SDL_EVENT_KEY_DOWN:
             if (e.key.repeat) break;
             if (e.key.key == SDLK_F4 && (e.key.mod & SDL_KMOD_ALT)) g_quit = 1;
