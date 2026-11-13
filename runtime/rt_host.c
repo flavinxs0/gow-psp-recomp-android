@@ -334,6 +334,10 @@ JNIEXPORT jdouble JNICALL Java_org_gow_shell_GameActivity_nativeGetFrameMs(JNIEn
     (void)env; (void)cls;
     return g_hud_frame_ms;
 }
+JNIEXPORT void JNICALL Java_org_gow_shell_GameActivity_nativeSkipMovie(JNIEnv *env, jclass cls) {
+    (void)env; (void)cls;
+    rt_host_request_movie_skip();
+}
 #endif
 static uint64_t g_skips_made, g_skipped_us;  /* virtual-time skips at a high frame rate (rt_host_idle) */
 static uint64_t g_skips_capped;              /* skips shortened (or left out) to keep the sound whole */
@@ -475,6 +479,12 @@ int rt_host_take_movie_skip(void) {
     int r = g_skip_req;
     g_skip_req = 0;
     return r;
+}
+
+void rt_host_request_movie_skip(void) {
+    if (!g_movie_on || g_skip_req) return;
+    g_skip_req = 1;
+    printf("[host] movie skip requested from Android menu\n");
 }
 
 static void movie_skip_press(uint32_t bits) {
@@ -821,4 +831,6 @@ int rt_host_idle(uint64_t now_us, uint64_t next_us) { replay_skips(now_us, next_
 static int live_input(uint32_t *b, int *lx, int *ly) { (void)b; (void)lx; (void)ly; return 0; }
 void rt_host_movie_playing(int on) { rt_display_movie_mode(on); }
 int rt_host_take_movie_skip(void) { return 0; }
+void rt_host_request_movie_skip(void) { }
+
 #endif

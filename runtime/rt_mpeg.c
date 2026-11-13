@@ -620,7 +620,13 @@ static void check_skip(Mpeg *m) {
     rt_host_movie_playing(1);
     if (!rt_host_take_movie_skip()) return;
     m->skipped = 1;
+    m->end_code = 1;
     m->have_vau = m->have_aau = 0;
+    /* The next scene must not inherit media queued before the skip. */
+    es_reset(&m->ves);
+    es_reset(&m->aes);
+    memset(&m->vmarks, 0, sizeof(m->vmarks));
+    memset(&m->amarks, 0, sizeof(m->amarks));
     rt_host_movie_playing(0);
     rt_log("[mpeg] movie skipped after %u pictures\n", m->video_frames);
     if (m->next_packet == ring_packet) while (ring_packet(m)) {}

@@ -2167,10 +2167,12 @@ public final class LauncherActivity extends Activity {
             out.add("--aspect");
             out.add("4:3");
         } else if ("WIDESCREEN".equals(mode) || "FULLSCREEN".equals(mode)) {
-            // Expand the 3D field of view and fill the complete device surface in every game screen.
+            // The renderer already computes a letterbox-free viewport from the
+            // physical display ratio. Do not add the old --stretch flag: it
+            // expands the post-pass independently and makes 2D game menus and
+            // cutscene subtitles look wider than the 3D scene on tall phones.
             out.add("--aspect");
             out.add(screenRatio());
-            out.add("--stretch");
         }
         return join(out);
     }

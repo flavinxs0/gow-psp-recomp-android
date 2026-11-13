@@ -43,6 +43,8 @@ int rt_host_wants_idle(void);
  * live input in the window skips; scripted runs stay deterministic. */
 void rt_host_movie_playing(int on);
 int rt_host_take_movie_skip(void);
+/* Requests the current MPEG movie to end, used by the Android in-game menu. */
+void rt_host_request_movie_skip(void);
 
 /* Gameplay refresh (rt_hle.c): 59.94 Hz by default, or --fps N. */
 void rt_display_set_hz(double hz);

@@ -45,6 +45,7 @@ public final class GameActivity extends SDLActivity {
     private final Handler hudHandler = new Handler(Looper.getMainLooper());
     private static native double nativeGetFps();
     private static native double nativeGetFrameMs();
+    private static native void nativeSkipMovie();
 
     private String localized(String value) {
         if (!"en".equals(getSharedPreferences("gow_settings", MODE_PRIVATE)
@@ -54,6 +55,10 @@ public final class GameActivity extends SDLActivity {
             case "Sair do game": return "Exit game";
             case "Editar controles na tela": return "Edit on-screen controls";
             case "Editar HUD de FPS": return "Edit FPS HUD";
+            case "Pular cutscene atual": return "Skip current cutscene";
+            case "Opções gráficas": return "Graphics options";
+            case "As opções gráficas são aplicadas ao iniciar o jogo novamente.": return "Graphics options are applied when the game starts again.";
+            case "Voltar ao launcher": return "Back to launcher";
             case "Concluir edição": return "Finish editing";
             case "Entre no modo de edição e arraste o botão desejado. Toque em Concluir para salvar.": return "Enter edit mode and drag the button you want. Tap Finish to save.";
             case "Editar": return "Edit";
@@ -189,6 +194,8 @@ public final class GameActivity extends SDLActivity {
         title.setTypeface(null, android.graphics.Typeface.BOLD);
         gameDrawer.addView(title, new LinearLayout.LayoutParams(-1, dp(42)));
         addDrawerButton("⏻  " + localized("Sair do game"), () -> { if (controls != null) controls.releaseAll(); finish(); });
+        addDrawerButton("▶  " + localized("Pular cutscene atual"), () -> nativeSkipMovie());
+        addDrawerButton("⚙  " + localized("Opções gráficas"), this::showInGameGraphicsInfo);
         addDrawerButton("⌘  " + localized("Editar controles na tela"), this::showInGameControlEditor);
         addDrawerButton("◉  " + localized("Editar HUD de FPS"), this::showInGameHudEditor);
         FrameLayout.LayoutParams drawerLp = new FrameLayout.LayoutParams(dp(250), -2, Gravity.RIGHT | Gravity.CENTER_VERTICAL);
@@ -265,6 +272,31 @@ public final class GameActivity extends SDLActivity {
         gameDrawer.setVisibility(open ? View.VISIBLE : View.GONE);
         ((TextView) gameDrawerHandle).setText(open ? "×" : "☰");
         if (controls != null && open) controls.releaseAll();
+    }
+
+    private void showInGameGraphicsInfo() {
+        String mode = prefs.getString("screen_mode", "16:9");
+        int fps = prefs.getInt("fps_limit", 60);
+        int scale = prefs.getInt("res_scale", 1);
+        boolean fxaa = prefs.getBoolean("fxaa", false);
+        boolean vsync = prefs.getBoolean("vsync", false);
+        String summary = "Tela: " + mode + "\n" +
+                "FPS: " + fps + "\n" +
+                "Escala: " + scale + "x\n" +
+                "FXAA: " + (fxaa ? "ligado" : "desligado") + "\n" +
+                "VSync: " + (vsync ? "ligado" : "desligado") + "\n\n" +
+                localized("As opções gráficas são aplicadas ao iniciar o jogo novamente.");
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(this)
+                .setTitle(localized("Opções gráficas"))
+                .setMessage(summary)
+                .setPositiveButton(localized("Voltar ao launcher"), (d, w) -> {
+                    if (controls != null) controls.releaseAll();
+                    finish();
+                })
+                .setNegativeButton(localized("Fechar"), null)
+                .create();
+        dialog.show();
+        styleGameDialog(dialog);
     }
 
     private void showInGameControlEditor() {
