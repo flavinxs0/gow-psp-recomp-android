@@ -31,12 +31,7 @@ macro(gow_fetch_archive name repo commit sha256)
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     SOURCE_DIR "${_gow_src}")
   FetchContent_MakeAvailable(${name})
-  # When FETCHCONTENT_SOURCE_DIR_<NAME> overrides the source (e.g. the prebuilt SDL checkout),
-  # FetchContent uses that external directory and may not create _gow_src. Only mark the pinned
-  # archive complete when its actual source directory exists.
-  if(IS_DIRECTORY "${_gow_src}")
-    file(TOUCH "${_gow_src}/.gow_complete")
-  endif()
+  file(TOUCH "${_gow_src}/.gow_complete")
 endmacro()
 
 # libchdr (BSD-3-Clause) reads the user's CHD disc images; pinned to a reviewed commit
@@ -47,8 +42,10 @@ gow_fetch_archive(libchdr rtissera/libchdr 47d794151b2b64f6aba60304e6480f4f5a2bc
   ee1131e748a2c7d7559b7054540ebe49637433901f92071560df52e369f7c7af)  # zlib/zstd/lzma are in its deps/, no submodules
 
 # SDL3 (zlib license): the game window, keyboard and gamepad input; pinned to release 3.4.16
+option(GOW_ANDROID "Build libmain.so for the Android SDL shell" OFF)
+set(GOW_SDL_SO "" CACHE FILEPATH "libSDL3.so for Android")
 option(GOW_WINDOW "Build the SDL3 window and input (gow_rt --window)" ON)
-if(GOW_WINDOW AND NOT GOW_TOOLS_ONLY)
+if(GOW_WINDOW AND NOT GOW_TOOLS_ONLY AND NOT GOW_ANDROID)
   set(SDL_SHARED OFF CACHE BOOL "" FORCE)
   set(SDL_STATIC ON CACHE BOOL "" FORCE)
   set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
@@ -142,10 +139,7 @@ if(MSVC)
   target_compile_definitions(openh264_dec PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
   target_compile_options(openh264_dec PRIVATE -O2 -w)
-  # Android's Bionic provides pthread symbols through libc; the NDK has no separate libpthread.
-  if(NOT ANDROID)
-    target_link_libraries(openh264_dec PRIVATE pthread)
-  endif()
+  target_link_libraries(openh264_dec PRIVATE pthread)
 endif()
 
 # PGD decryption (Ghost of Sparta's encrypted data files, sceIoIoctl 0x04100001): PPSSPP's
@@ -245,6 +239,7 @@ set_target_properties(gow_rt PROPERTIES OUTPUT_NAME "gow_rt_${GAME}" C_STANDARD 
 if(GOW_ANDROID)
   set_target_properties(gow_rt PROPERTIES OUTPUT_NAME "main")
   set_source_files_properties(runtime/rt_main.c PROPERTIES COMPILE_DEFINITIONS "main=gow_main")
+  # Do not rely solely on toolchain predefined macros for Android-only SDL safeguards.
   target_compile_definitions(gow_rt PRIVATE GOW_ANDROID=1)
   target_link_options(gow_rt PRIVATE -Wl,--allow-shlib-undefined)
 endif()
@@ -254,9 +249,8 @@ if(GOW_WINDOW)
   if(GOW_ANDROID)
     add_library(SDL3_android SHARED IMPORTED)
     set_target_properties(SDL3_android PROPERTIES IMPORTED_LOCATION "${GOW_SDL_SO}")
-    # The Android workflow checks SDL out at the repository root; FetchContent may not populate build/deps/SDL3-*/include.
     file(GLOB _sdl_inc "${CMAKE_SOURCE_DIR}/build/deps/SDL3-*/include")
-    target_include_directories(gow_rt PRIVATE "${CMAKE_SOURCE_DIR}/SDL/include" ${_sdl_inc})
+    target_include_directories(gow_rt PRIVATE ${_sdl_inc})
     target_link_libraries(gow_rt PRIVATE SDL3_android)
   else()
     target_link_libraries(gow_rt PRIVATE SDL3::SDL3-static)
@@ -275,6 +269,9 @@ if(MSVC)
   # the renderer's per-pixel functions are hot; stack cookies cost several percent there
   set_source_files_properties(runtime/rt_gesoft.c PROPERTIES COMPILE_OPTIONS /GS-)
 else()
+  # Android runs the recompilation and GE command processing on ARM64; use the
+  # stronger optimizing pass for the native game/runtime hot paths without
+  # enabling fast-math or changing floating-point contraction semantics.
   if(ANDROID)
     target_compile_options(gow_rt PRIVATE -O3 -fno-strict-aliasing -ffp-contract=off -Wno-unused-label)
   else()

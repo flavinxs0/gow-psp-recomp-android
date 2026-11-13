@@ -1,15 +1,8 @@
 name: "Teste Android — Ghost of Sparta (isolado)"
-# Disparo de teste usando o link novo do Google Drive em 2026-10-24.
-# Build manual e isolada de Ghost of Sparta; nunca reutiliza bibliotecas de Chains of Olympus.
-# ISO atualizada para o novo arquivo compartilhado pelo usuário.
+# Legacy isolated Ghost of Sparta diagnostic build; never substitutes the CoO library.
 on:
+  # Isolated Ghost of Sparta diagnostic build; not the supported Dual APK.
   workflow_dispatch:
-  push:
-    paths:
-      - 'runtime/rt_fiber.c'
-      - 'runtime/rt_android.c'
-      - 'CMakeLists.txt'
-      - '.github/workflows/build-ghost-of-sparta.yml'
 
 permissions:
   contents: read
@@ -18,9 +11,39 @@ permissions:
 env:
   GAME_ID: UCUS98737
   SDL_COMMIT: fa2c02bb6e21974a89ea9824bc53c9932abe5f9c
-  ISO_DRIVE_ID: 1ANlgMsZynUC50EGMt0AwPloK93D9uK4j # link novo enviado pelo Flavin
 
 jobs:
+  launcher-validation:
+    name: Validar compilação do launcher Android
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: libsdl-org/SDL
+          ref: ${{ env.SDL_COMMIT }}
+          path: SDL
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Criar projeto Android com runtime de teste
+        run: |
+          printf '#include <SDL3/SDL_main.h>\nint main(int argc, char **argv) { (void)argc; (void)argv; return 0; }\n' > stub.c
+          python3 SDL/build-scripts/create-android-project.py org.gow.shell stub.c --output "$RUNNER_TEMP/gow-launcher-check"
+          python3 tools/install_android_launcher.py "$RUNNER_TEMP/gow-launcher-check/org.gow.shell"
+
+      - name: Compilar Java, recursos e manifesto do launcher
+        run: |
+          cd "$RUNNER_TEMP/gow-launcher-check/org.gow.shell"
+          ./gradlew --no-daemon assembleDebug
+          test -s app/build/outputs/apk/debug/app-debug.apk
+          echo "Launcher compilado com sucesso (runtime nativo de teste; não é APK para jogar)."
+
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -38,19 +61,30 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Baixar o disco pelo Google Drive
+      - name: Baixar o disco (link secreto)
+        env:
+          GOW_GOS_DISC_URL: ${{ secrets.GOW_GOS_DISC_URL }}
         run: |
-          set -euo pipefail
-          python3 -m pip install --break-system-packages -q 'gdown>=6.1'
-          python3 -m gdown "$ISO_DRIVE_ID" -O game.iso
-          test -s game.iso
-          SIZE="$(stat -c%s game.iso)"
-          if [ "$SIZE" -le 50000000 ]; then
-            echo "::error::Download incompleto ou arquivo inválido: $SIZE bytes."
+          test -n "$GOW_GOS_DISC_URL" || { echo "::error::Configure o secret GOW_GOS_DISC_URL."; exit 1; }
+          echo "::add-mask::$GOW_GOS_DISC_URL"
+          python3 -m pip install --break-system-packages -q --upgrade gdown
+          # Google Drive pode bloquear downloads grandes ou deixar a conexão presa; limite cada tentativa.
+          OK=0
+          for ATTEMPT in 1 2 3; do
+            rm -f game.iso
+            if timeout 90s gdown "$GOW_GOS_DISC_URL" -O game.iso; then
+              SIZE=$(stat -c%s game.iso 2>/dev/null || echo 0)
+              if [ "$SIZE" -gt 50000000 ]; then OK=1; break; fi
+            fi
+            echo "Tentativa $ATTEMPT/3 falhou; aguardando antes de tentar novamente."
+            sleep 12
+          done
+          if [ "$OK" -ne 1 ]; then
+            echo "::error::ISO Ghost of Sparta indisponível. Build cancelada sem fallback para outro jogo."
             exit 1
           fi
-          file game.iso
-          echo "ISO baixada: $SIZE bytes"
+          echo "ISO baixada: $(stat -c%s game.iso) bytes"
+
 
       - name: Ferramentas do host (gow_disc)
         run: |
@@ -94,15 +128,18 @@ jobs:
           mkdir -p stubs
           "$AR" rc stubs/libpthread.a
           "$AR" rc stubs/librt.a
+          mkdir -p build/deps
+          ln -sfn "$PWD/SDL" "build/deps/SDL3-${SDL_COMMIT}"
+          # Marca o checkout SDL já disponível para o FetchContent reutilizá-lo, sem tentar renomear por cima do symlink.
+          touch "build/deps/SDL3-${SDL_COMMIT}/.gow_complete"
           cmake -S . -B build/cmake_android -G Ninja \
-            -DFETCHCONTENT_SOURCE_DIR_SDL3:PATH="$PWD/SDL" \
+            -DFETCHCONTENT_SOURCE_DIR_SDL3="$PWD/SDL" \
             -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
             -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-24 -DANDROID_STL=c++_shared \
             -DCMAKE_BUILD_TYPE=Release \
             -DGAME="${GAME_ID}_full" -DGOW_ANDROID=ON \
             -DGOW_SDL_SO="$PWD/build-sdl/libSDL3.so" \
-            -DCMAKE_SHARED_LINKER_FLAGS="-L$PWD/stubs" \
-            -DCMAKE_EXE_LINKER_FLAGS="-L$PWD/stubs"
+            -DCMAKE_SHARED_LINKER_FLAGS="-L$PWD/stubs"
           cmake --build build/cmake_android --parallel
           find build/cmake_android -name 'libmain.so' -type f
 
@@ -120,12 +157,12 @@ jobs:
         run: |
           printf '#include <SDL3/SDL_main.h>\nint main(int argc, char **argv) { (void)argc; (void)argv; return 0; }\n' > stub.c
           python3 SDL/build-scripts/create-android-project.py org.gow.shell stub.c --output "$RUNNER_TEMP/gow-android-project"
-          APP="$RUNNER_TEMP/gow-android-project/org.gow.shell"
-          cd "$APP"
-          RUN_VERSION_CODE=$((1000 + GITHUB_RUN_NUMBER))
+          python3 tools/install_android_launcher.py "$RUNNER_TEMP/gow-android-project/org.gow.shell"
+          cd "$RUNNER_TEMP/gow-android-project/org.gow.shell"
+          # versionCode crescente: o Android so atualiza por cima se nao for menor
           for f in app/build.gradle app/build.gradle.kts; do
             if [ -f "$f" ]; then
-              sed -i -E "s/versionCode([ =]+)[0-9]+/versionCode\\1${RUN_VERSION_CODE}/" "$f"
+              sed -i -E 's/versionCode([ =]+)[0-9]+/versionCode\1${{ github.run_number }}/' "$f"
               grep -n versionCode "$f" || true
             fi
           done
@@ -136,18 +173,10 @@ jobs:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
-          mkdir -p "$RUNNER_TEMP/apk-overlay"
-          cd "$RUNNER_TEMP/apk-overlay"
-          unzip -q "$RUNNER_TEMP/gow-android-project/org.gow.shell/app/build/outputs/apk/debug/app-debug.apk"
-          mkdir -p lib/arm64-v8a
-          cp "$GITHUB_WORKSPACE/pack/lib/arm64-v8a/libmain.so" lib/arm64-v8a/libmain.so
-          cp "$GITHUB_WORKSPACE/pack/lib/arm64-v8a/libc++_shared.so" lib/arm64-v8a/libc++_shared.so
-          echo "Bibliotecas ARM64 finais no APK:"
-          ls -lh lib/arm64-v8a/
-          # Android 11+ exige resources.arsc sem compressão e alinhado.
-          # Cria o APK com esse recurso armazenado (ZIP method 0), depois inclui os demais arquivos.
-          zip -q -0 "$RUNNER_TEMP/unsigned.apk" resources.arsc
-          zip -qr "$RUNNER_TEMP/unsigned.apk" . -x resources.arsc
+          python3 tools/package_playable_launcher.py \
+            "$RUNNER_TEMP/gow-android-project/org.gow.shell/app/build/outputs/apk/debug/app-debug.apk" \
+            "$RUNNER_TEMP/source-game.apk" \
+            "$RUNNER_TEMP/unsigned.apk"
           BUILD_TOOLS="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
           "$BUILD_TOOLS/zipalign" -f -p 4 "$RUNNER_TEMP/unsigned.apk" "$RUNNER_TEMP/aligned.apk"
           if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
@@ -172,5 +201,3 @@ jobs:
           path: ${{ runner.temp }}/GodOfWar-GhostOfSparta-test.apk
           if-no-files-found: error
           retention-days: 1
-
-# Retry triggered on 2026-10-25 at user request.

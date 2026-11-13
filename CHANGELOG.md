@@ -1,27 +1,21 @@
 # Histórico de alterações / Changelog
 
-Este arquivo registra mudanças visíveis ao usuário no projeto Android. / This file tracks user-visible changes in the Android project.
+## v1.3.0 — Android Dual
 
-## android-v1.0.0
+### Português
+- Novo launcher cinematográfico com cards para Chains of Olympus e Ghost of Sparta.
+- Status contextual de `game.iso` e ação principal alternando entre Jogar e Importar ISO.
+- Diálogos de escolha/importação reorganizados para facilitar o uso no Android.
+- Menu durante o jogo redesenhado e mais compacto.
+- APK Dual ARM64 com os dois runtimes nativos independentes.
 
-### 🇧🇷 Português
-- Inicializador Android personalizado com tema de God of War.
-- Tela integrada para iniciar o jogo.
-- Controles por toque na tela.
-- Opções gráficas e de exibição disponíveis nesta compilação.
-- Compilação nativa para Android ARM64 usando SDL3.
-- Distribuição do APK por meio da página GitHub Releases.
-- O aplicativo exige que o usuário forneça sua própria cópia legal do jogo.
+### English
+- New cinematic launcher with cards for Chains of Olympus and Ghost of Sparta.
+- Contextual `game.iso` status and a primary action that switches between Play and Import ISO.
+- Refreshed game-selection and import dialogs for Android.
+- Redesigned, more compact in-game drawer.
+- ARM64 Dual APK with independent native runtimes for both titles.
 
-### 🇺🇸 English
-- Custom God of War-themed Android launcher.
-- Integrated game launch screen.
-- On-screen touch controls.
-- Graphics and display options available in this build.
-- Native Android ARM64 build using SDL3.
-- APK distribution through GitHub Releases.
-- Users must provide their own legally obtained copy of the game.
+## Histórico anterior
 
-## Próximas versões / Future releases
-
-As alterações serão adicionadas aqui quando forem implementadas e publicadas. / Changes will be added here when implemented and released.
+The project history is preserved in the repository commits and previous Android releases.
