@@ -77,7 +77,7 @@ public final class LauncherActivity extends Activity {
     private static final int PICK_GAME_ISO = 401;
     private static final int PICK_IMAGE_BIN = 402;
     private static final int REQUEST_WRITE_LOG = 403;
-    private static final String VERSION = "v1.1.0";
+    private static final String VERSION = "v1.3.0";
     private static final String REPO_URL = "https://github.com/flavinxs0/gow-psp-recomp-android";
     private static final String[] MODES = { "16:9", "4:3", "WIDESCREEN" };
 
